@@ -1,6 +1,7 @@
 # ADR 0002 — Caminho quente do redirect
 
-- **Status:** rascunho (fase 0). Os números saem da fase 2, em `docs/performance.md`.
+- **Status:** aceito (fase 2). Números em [`docs/performance.md`](../performance.md): p95 com cache de
+  6,4 ms (meta < 20 ms).
 - **Data:** 2026-11-09
 
 ## Contexto
@@ -126,6 +127,35 @@ métrica (`clicks_dropped_total`). **Perder um clique é aceitável; atrasar ou 
 não.**
 
 O evento não leva o IP: veja o ADR 0003.
+
+## Resultado da fase 2
+
+Média de 2 rodadas de 30 s com 50 conexões, autocannon na mesma máquina:
+
+| Cenário | req/s | p50 | p95 | p99 |
+| - | -: | -: | -: | -: |
+| Cache quente, 1 ida ao Redis (Lua bucket + GET) | 10.129 | 4,64 ms | **6,42 ms** | 7,75 ms |
+| Cache quente, 2 idas | 8.921 | 5,22 ms | 7,29 ms | 9,05 ms |
+| Sem cache (`CACHE=off`) | 7.891 | 5,98 ms | 8,09 ms | 10,02 ms |
+| Cache negativo (404) | 16.090 | 2,95 ms | 4,48 ms | 5,79 ms |
+
+- O script único em Lua (1 ida ao Redis) dá +13,5 % de req/s em relação a 2 idas, e por isso foi mantido.
+- A latência é quase toda fila: pela Lei de Little, 50 conexões / 10 mil req/s = 5 ms.
+
+Ajustes acordados durante a implementação:
+- `writeThrough(redis, slug, link | null)` recebe o slug, porque com `null` não haveria de onde tirar
+  a chave.
+- O JSON em cache não leva hash de senha nem dono. Leva só um resumo `passwordVersion`, e trocar a
+  senha invalida os cookies de desbloqueio.
+- Com o Redis fora, o limite de cliques fica aberto, ou seja, o link continua funcionando, coerente
+  com "não derrubar redirects". O redirect serve pelo Postgres e conta `redis_fallback_total`.
+- O bucket da senha (5/min) vale mesmo com `RATE_LIMIT=off`, que só existe para o bench.
+- O redirect também recusa (404) um destino resolvido que não seja http/https, como defesa em
+  profundidade, já que o banco não valida esses campos.
+- `HEAD` é atendido como `GET`, e HEAD sem user agent é classificado como bot.
+- Limitações conhecidas:
+  - o iPadOS 13+ se anuncia como Macintosh e cai em desktop;
+  - em Redis Cluster, as chaves `rl:` e `l:` precisariam de uma hash tag comum.
 
 ## Consequências
 

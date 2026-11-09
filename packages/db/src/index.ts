@@ -2,6 +2,7 @@ export { createDb, type CreateDbOptions, type Database } from './client';
 export {
   createLink,
   createLinks,
+  findLinkBySlug,
   DEFAULT_MAX_ATTEMPTS,
   InvalidAliasError,
   SlugExhaustedError,
@@ -14,3 +15,6 @@ export {
 } from './links';
 export * as schema from './schema';
 export { links, users, type Link, type NewLink, type RedirectType, type User } from './schema';
+
+/** Operadores do Drizzle reexportados, para os apps usarem a mesma instância do pacote. */
+export { and, eq, sql } from 'drizzle-orm';

@@ -12,15 +12,22 @@
     "lint": "corepack pnpm -r lint",
     "test": "corepack pnpm -r test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "bench:redirect": "tsx scripts/bench-redirect.ts"
   },
   "devDependencies": {
+    "@encurtador/db": "workspace:*",
     "@eslint/js": "^10.0.1",
+    "@types/autocannon": "^7.12.7",
+    "@types/node": "^22.20.5",
+    "autocannon": "^9.0.0",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
+    "ioredis": "^6.0.0",
     "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1"
   }

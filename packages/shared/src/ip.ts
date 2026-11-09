@@ -172,3 +172,95 @@ export function classifyIp(ip: string): IpKind {
 export function isPublicIp(ip: string): boolean {
   return classifyIp(ip) === 'public';
 }
+
+/** Se o IPv6 é IPv4 mapeado (`::ffff:a.b.c.d`), devolve o IPv4 como inteiro. */
+function mappedV4(words: number[]): number | null {
+  const [w0, w1, w2, w3, w4, w5, w6, w7] = words;
+  if (w0 === 0 && w1 === 0 && w2 === 0 && w3 === 0 && w4 === 0 && w5 === 0xffff) {
+    return ((w6! << 16) >>> 0) + w7!;
+  }
+  return null;
+}
+
+const v4ToString = (n: number) => [n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+
+/** Forma comprimida canônica (RFC 5952) de 8 palavras. */
+function v6ToString(words: number[]): string {
+  let bestStart = -1;
+  let bestLen = 0;
+  for (let i = 0; i < 8;) {
+    if (words[i] !== 0) {
+      i++;
+      continue;
+    }
+    let j = i;
+    while (j < 8 && words[j] === 0) j++;
+    if (j - i > bestLen && j - i >= 2) {
+      bestStart = i;
+      bestLen = j - i;
+    }
+    i = j;
+  }
+  const hex = words.map((w) => w.toString(16));
+  if (bestStart === -1) return hex.join(':');
+  return `${hex.slice(0, bestStart).join(':')}::${hex.slice(bestStart + bestLen).join(':')}`;
+}
+
+/**
+ * IP truncado para geolocalização (ADR 0003): /24 em IPv4 (`203.0.113.0`), /48 em IPv6
+ * (`2001:db8:abcd::`). IPv4 mapeado em IPv6 é tratado como IPv4. Devolve só o endereço de rede, sem
+ * o prefixo; `null` se não for IP.
+ */
+export function truncateIp(ip: string): string | null {
+  const v4 = parseIpv4(ip);
+  if (v4 !== null) return v4ToString((v4 & 0xffffff00) >>> 0);
+  const v6 = parseIpv6(ip);
+  if (v6 === null) return null;
+  const mapped = mappedV4(v6);
+  if (mapped !== null) return v4ToString((mapped & 0xffffff00) >>> 0);
+  return v6ToString([v6[0]!, v6[1]!, v6[2]!, 0, 0, 0, 0, 0]);
+}
+
+/**
+ * Compila uma lista de IPs/CIDRs (`10.0.0.0/8, 127.0.0.1, ::1/128`) num teste de pertinência. IPv4
+ * mapeado em IPv6 casa com a regra IPv4. Entrada inválida lança `TypeError` (é configuração).
+ */
+export function compileCidrs(list: string | readonly string[]): (ip: string) => boolean {
+  const items = (typeof list === 'string' ? list.split(',') : list)
+    .map((s) => s.trim())
+    .filter((s) => s !== '');
+  const v4: { base: number; mask: number }[] = [];
+  const v6: { words: number[]; prefix: number }[] = [];
+  for (const item of items) {
+    const [addr, prefixRaw] = item.split('/') as [string, string | undefined];
+    const a4 = parseIpv4(addr);
+    const a6 = a4 === null ? parseIpv6(addr) : null;
+    if (a4 === null && a6 === null) throw new TypeError(`CIDR inválido: "${item}"`);
+    const max = a4 !== null ? 32 : 128;
+    const prefix = prefixRaw === undefined ? max : Number(prefixRaw);
+    if (!Number.isInteger(prefix) || prefix < 0 || prefix > max || prefixRaw === '') {
+      throw new TypeError(`CIDR inválido: "${item}"`);
+    }
+    if (a4 !== null) v4.push({ base: (a4 & mask(prefix)) >>> 0, mask: mask(prefix) });
+    else v6.push({ words: a6!, prefix });
+  }
+  const inV6 = (w: number[], rule: { words: number[]; prefix: number }) => {
+    let bits = rule.prefix;
+    for (let i = 0; i < 8 && bits > 0; i++, bits -= 16) {
+      const m = bits >= 16 ? 0xffff : (0xffff << (16 - bits)) & 0xffff;
+      if ((w[i]! & m) !== (rule.words[i]! & m)) return false;
+    }
+    return true;
+  };
+  return (ip: string) => {
+    let n = parseIpv4(ip);
+    let w: number[] | null = null;
+    if (n === null) {
+      w = parseIpv6(ip);
+      if (w === null) return false;
+      n = mappedV4(w);
+    }
+    if (n !== null && v4.some((r) => (n! & r.mask) >>> 0 === r.base)) return true;
+    return w !== null && v6.some((r) => inV6(w!, r));
+  };
+}

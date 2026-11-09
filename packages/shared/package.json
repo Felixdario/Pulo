@@ -16,5 +16,9 @@
     "fast-check": "^4.10.2",
     "typescript": "~6.0.3",
     "vitest": "^5.1.0"
+  },
+  "dependencies": {
+    "isbot": "^5.2.3",
+    "zod": "^4.6.7"
   }
 }

@@ -17,7 +17,27 @@ export {
   validateAlias,
   type AliasValidation,
 } from './reserved';
-export { classifyIp, isPublicIp, parseIpv4, parseIpv6, type IpKind } from './ip';
+export {
+  classifyIp,
+  compileCidrs,
+  isPublicIp,
+  parseIpv4,
+  parseIpv6,
+  truncateIp,
+  type IpKind,
+} from './ip';
+export { classifyAgent, type AgentKind } from './agent';
+export { detectDevice, type DeviceInfo, type DeviceOs, type DeviceType } from './device';
+export {
+  hasDeviceRules,
+  hasGeoRules,
+  linkRulesSchema,
+  resolveDestination,
+  type LinkRules,
+  type ResolveContext,
+} from './rules';
+export { mergeQuery } from './query';
+export { uuidv7 } from './uuid';
 export {
   MAX_DESTINATION_LENGTH,
   normalizeShortDomains,

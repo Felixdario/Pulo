@@ -181,7 +181,7 @@ describe('createLink', () => {
       maxClicks: 10,
       passwordHash: 'hash',
       forwardQuery: false,
-      rules: { utm: { source: 'x' } },
+      rules: { geo: [{ countries: ['BR'], url: 'https://example.com/br' }] },
     });
     expect(link).toMatchObject({
       isCustom: true,
@@ -193,7 +193,7 @@ describe('createLink', () => {
       maxClicks: 10,
       passwordHash: 'hash',
       forwardQuery: false,
-      rules: { utm: { source: 'x' } },
+      rules: { geo: [{ countries: ['BR'], url: 'https://example.com/br' }] },
     });
   });
 });

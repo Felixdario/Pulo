@@ -1,3 +1,4 @@
+import type { LinkRules } from '@encurtador/shared';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -37,7 +38,7 @@ export type RedirectType = (typeof REDIRECT_TYPES)[number];
 export const LINK_STATUSES = ['active', 'disabled', 'blocked_loop'] as const;
 export type LinkStatus = (typeof LINK_STATUSES)[number];
 
-export type LinkRules = Record<string, unknown>;
+export type { LinkRules } from '@encurtador/shared';
 
 export const links = pgTable(
   'links',

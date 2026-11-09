@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./cache": "./src/cache/index.ts",
+    "./testing": "./src/testing.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -19,6 +21,7 @@
   "dependencies": {
     "@encurtador/shared": "workspace:*",
     "drizzle-orm": "^0.45.4",
+    "ioredis": "^6.0.0",
     "postgres": "^4.1.0"
   },
   "devDependencies": {

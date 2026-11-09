@@ -61,3 +61,6 @@ jobs:
       - run: pnpm --filter @encurtador/db db:migrate
 
       - run: pnpm --filter @encurtador/db test:integration
+
+      # Fase 2: redirect contra o Postgres (encurtador_test) e o Redis (db 1) dos services.
+      - run: pnpm --filter @encurtador/redirect test:integration

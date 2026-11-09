@@ -1,4 +1,5 @@
 import { generateSlug, validateAlias, type SlugGenerator } from '@encurtador/shared';
+import { eq } from 'drizzle-orm';
 import type { PgDatabase } from 'drizzle-orm/pg-core';
 import type { PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
 import { links, type Link, type LinkRules, type NewLink, type RedirectType } from './schema';
@@ -243,4 +244,13 @@ export async function createLinks(
 
     return results.map((r) => r!);
   });
+}
+
+/**
+ * Linha do link pelo slug exato (COLLATE "C"), inclusive apagado ou desativado: o redirect precisa
+ * saber que ele existe para gravar o cache negativo. Uma query, pelo índice `links_slug_key`.
+ */
+export async function findLinkBySlug(db: Executor, slug: string): Promise<Link | null> {
+  const [link] = await db.select().from(links).where(eq(links.slug, slug)).limit(1);
+  return link ?? null;
 }
