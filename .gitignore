@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.local
+coverage
+*.mmdb
+*.tsbuildinfo
+
+# log da dupla de agentes (local)
+.dupla/
