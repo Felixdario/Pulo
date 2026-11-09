@@ -56,3 +56,8 @@ jobs:
       - run: pnpm typecheck
 
       - run: pnpm test
+
+      # Fase 1: migrações no banco do service e integração (cria e migra encurtador_test sozinho).
+      - run: pnpm --filter @encurtador/db db:migrate
+
+      - run: pnpm --filter @encurtador/db test:integration

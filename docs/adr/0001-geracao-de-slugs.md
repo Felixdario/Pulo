@@ -1,6 +1,6 @@
 # ADR 0001 — Geração de slugs e unicidade
 
-- **Status:** rascunho (fase 0). Vira "aceito" quando os testes da fase 1 confirmarem os números.
+- **Status:** aceito (fase 1, validado em modo trio)
 - **Data:** 2026-11-09
 
 ## Contexto
@@ -125,5 +125,33 @@ RETURNING id;
      nenhum slug duplicado.
   3. **Corrida:** 20 requisições concorrentes com o mesmo alias resultam em 1 × 201 e 19 × 409.
 - O custo de um link novo é um único `INSERT` em quase 100 % dos casos.
+- **Lotes ordenados por slug:** o Validador provocou deadlock (`40P01`) em 1 de 40 lotes, com dois lotes
+  simultâneos levando os mesmos 200 aliases em ordens inversas. Cada transação trava as chaves do
+  índice único na ordem do `VALUES`. A solução foi ordenar cada rodada do lote por ponto de código,
+  que é a mesma ordem do `COLLATE "C"`, antes do `INSERT`. Sem a ordenação o teste falha 3 de 3 vezes;
+  com ela passa 3 de 3.
+- Violações de CHECK ou FK abortam o lote inteiro. Só conflito de slug é tratado item a item, então a
+  API valida as faixas e o destino antes.
+
+## Números medidos (fase 1)
+
+| Medida | Resultado |
+| - | - |
+| Gerar 1.000.000 de slugs | 739–857 ms (Node 22, Windows 11) |
+| Pares repetidos em 1M (esperado 0,14) | 0, 0, 0, 1, 0, 1, 0, 0, 0 em 9 execuções |
+| Qui-quadrado por posição (61 g.l.) | 37,98–83,50; menor p = 0,030 |
+| Critério | p > 0,001/7 em cada posição (Bonferroni, ~0,1 % de falso alarme) e ≤ 3 pares |
+| Mutante `byte % 62` | χ² ≈ 6.400–6.900, reprovado |
+| Mutante leve (um símbolo ~12 % mais provável) | p ≈ 1e-41, reprovado |
+| Mutante que repete 1 slug a cada 100 mil | 10 pares, reprovado pelo critério de pares |
+| 50 `createLink` concorrentes num espaço de 8 slugs | 8 ok, 42 `SlugExhaustedError`, 8 slugs distintos |
+| 20 pedidos concorrentes do mesmo alias | 1 ok, 19 `SlugTakenError` |
+| Lote de 1.000 itens | 1 `INSERT` (`begin, insert, commit`) |
+
+**Segurança do destino:** o Validador testou cerca de 100 ataques. Passaram, por exemplo, `0x7f.1`,
+`127。0。0。1`, `[::ffff:a9fe:a9fe]`, `java\tscript:`, `ｅｎｃ.ta` e `enc%2eta`. Ele também encontrou
+furos, todos corrigidos:
+- `ip6-localhost` e hosts de um rótulo só (`http://router/`) agora viram `private_host`;
+- `shortDomains` malformado agora lança `TypeError` (`normalizeShortDomains`).
 - Abrimos mão de slugs ordenáveis por tempo, que não são necessários, porque a ordenação usa
   `created_at` e `id`.
