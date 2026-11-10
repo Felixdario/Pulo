@@ -24,7 +24,7 @@ const CSS =
   'input{font:inherit;height:44px;padding:0 12px;border:1px solid var(--controle);border-radius:4px;background:var(--folha);color:var(--tinta)}' +
   'input:focus-visible,button:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}' +
   'button{font:inherit;font-weight:600;height:44px;border:0;border-radius:4px;background:var(--tinta);color:var(--on);cursor:pointer}' +
-  'button:active{transform:scale(.97)}.err{color:var(--neg);font-weight:600}' +
+  'button{transition:transform 160ms cubic-bezier(.2,.8,.2,1)}button:active{transform:scale(.97)}@media (prefers-reduced-motion:reduce){button{transition:none}button:active{transform:none}}.err{color:var(--neg);font-weight:600}' +
   '.pe{margin-top:48px;font-size:13px}.pe b{color:var(--tinta);font-weight:850;font-stretch:condensed}.pe i{color:var(--dado);font-style:normal}';
 
 const MARCA = '<span class="marca">pulo.</span>';

@@ -127,6 +127,14 @@ Ajustes acordados durante a implementação:
   - As dimensões e o resumo usam dias UTC.
 - **Rotação estrita do refresh:** duas abas renovando ao mesmo tempo revogariam a família. O front
   resolve isso com um refresh único compartilhado entre as abas (fase 7). Não há janela de tolerância.
+- **Heartbeat do SSE** (alterado na fase 8). O servidor manda o evento nomeado `heartbeat`, sem
+  dados, a cada 15 s. Se o cliente fica 40 s sem receber nenhum evento, considera a conexão morta e
+  reconecta com um ticket novo.
+  - Motivo: o heartbeat era um comentário SSE, e o `EventSource` não expõe comentários ao código.
+  - Consequência: atrás de um proxy que corta a conexão sem fechá-la, a tela mostrava "Ao vivo" para
+    sempre.
+  - Os canais são `<LIVE_CHANNEL_PREFIX><user_id>`. O Pub/Sub do Redis ignora o db, então ambientes
+    que dividem o mesmo Redis precisam de prefixos diferentes.
 - O seed demo grava agregados sintéticos. O teste de consistência agregado × bruto da fase 5 usa os
   dados do seed grande, que geram linhas brutas.
 

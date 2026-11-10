@@ -6,28 +6,33 @@ import { Hint } from './ui';
 
 /**
  * Contador ao vivo (DESIGN.md): o ponto rosa e o número de hoje. O dígito troca de uma vez, como um
- * placar (nada de contar rolando); o delta acende por 600 ms. A região `aria-live` fala no máximo a
+ * placar (nada de contar rolando); o delta acende por 600 ms, no máximo a cada 2 s (num link quente
+ * chega lote a cada segundo, e reacender sem parar vira pisca-pisca). A região `aria-live` fala no máximo a
  * cada 30 s, já agregada, e pode ser silenciada.
  */
 export function LiveCounter({
   today,
   lastMinute,
   pulse,
+  received,
   state,
   pausedAt,
   onResume,
 }: {
   today: number | undefined;
   lastMinute: number;
-  /** Muda a cada clique recebido (dispara o acender). */
+  /** Muda quando o delta deve acender (já limitado a uma vez a cada 2 s por quem chama). */
   pulse: number;
+  /** Cliques humanos recebidos pelo ao vivo desde a abertura (para o anúncio agregado). */
+  received: number;
   state: LiveState;
   pausedAt: Date | null;
   onResume: () => void;
 }) {
   const [muted, setMuted] = useState(false);
   const [announce, setAnnounce] = useState('');
-  const pending = useRef(0);
+  const receivedRef = useRef(received);
+  const announced = useRef(received);
   const lastAnnounce = useRef(0);
   const todayRef = useRef(today);
 
@@ -36,15 +41,15 @@ export function LiveCounter({
   }, [today]);
 
   useEffect(() => {
-    if (pulse > 0) pending.current += 1;
-  }, [pulse]);
+    receivedRef.current = received;
+  }, [received]);
 
   useEffect(() => {
     const t = setInterval(() => {
-      if (pending.current === 0 || muted) return;
+      const n = receivedRef.current - announced.current;
+      if (n <= 0 || muted) return;
       if (Date.now() - lastAnnounce.current < 30_000) return;
-      const n = pending.current;
-      pending.current = 0;
+      announced.current = receivedRef.current;
       lastAnnounce.current = Date.now();
       const total = todayRef.current;
       setAnnounce(
@@ -98,6 +103,14 @@ export function LiveCounter({
       )}
       <span className="sr-only" aria-live="polite">
         {muted ? '' : announce}
+      </span>
+      {/* A queda da conexão também é anunciada (uma vez por mudança), não só desenhada no ponto. */}
+      <span className="sr-only" role="status">
+        {state === 'paused'
+          ? 'Ao vivo pausado.'
+          : state === 'reconnecting'
+            ? 'Ao vivo reconectando.'
+            : ''}
       </span>
     </div>
   );

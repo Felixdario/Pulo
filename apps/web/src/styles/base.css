@@ -257,7 +257,7 @@ a {
 .btn-troca > span {
   grid-area: 1 / 1;
   text-align: center;
-  transition: opacity var(--dur-retorno) ease;
+  transition: opacity var(--dur-retorno) var(--ease-saida);
 }
 
 .btn-troca > span[aria-hidden='true'] {
@@ -395,18 +395,24 @@ select.campo {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: var(--altura-chip);
-  padding: 0 var(--esp-2);
+  /* Uma linha de 22 px no caso comum; um chip de regra com URL longa ("Tablet → /colecao/…")
+     quebra dentro da folha em vez de vazar da página a 200 % de zoom (break-ui). */
+  min-height: var(--altura-chip);
+  padding: 3px var(--esp-2);
   border-radius: var(--raio-chip);
   background: var(--elevado);
   color: var(--tinta);
   font-size: var(--fs-rotulo);
-  line-height: 1;
+  line-height: 16px;
   font-weight: 500;
-  white-space: nowrap;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+}
+
+.chips > li,
+.chips .dica-gatilho {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .chip-aviso {
@@ -471,7 +477,11 @@ select.campo {
   color: var(--suave);
 }
 
+/* O slug anda inteiro: se não couber ao lado do domínio, desce para a linha de baixo em vez de partir
+   no hífen ("e2e-" / "ihvi7b"); só um alias maior que a linha quebra por dentro (break-ui). */
 .curto-slug {
+  display: inline-block;
+  max-width: 100%;
   color: var(--tinta);
 }
 
@@ -579,6 +589,11 @@ select.campo {
   opacity: 0;
 }
 
+/* O fundo sai junto com o diálogo (120 ms), sem ficar escurecendo a tela depois dele. */
+.fundo-dialogo[data-ending-style] {
+  transition-duration: 120ms;
+}
+
 .dialogo {
   position: fixed;
   top: 50%;
@@ -660,6 +675,10 @@ select.campo {
   border: 1px solid var(--borda);
   border-radius: var(--raio-folha);
   box-shadow: var(--sombra-flutuante);
+  /* O padrão do Sonner é 400 ms com `ease`: aviso é resposta do sistema, chega em 200 ms com a saída
+     rápida do resto do app (o Sonner desmonta o aviso 200 ms depois de mandar sair). */
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-saida);
 }
 
 @media (prefers-reduced-motion: reduce) {

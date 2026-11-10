@@ -49,6 +49,30 @@ export async function ensureTestDatabase(): Promise<string> {
   return testUrl;
 }
 
+/**
+ * Trava de suíte: as integrações de db, redirect, worker e api dividem `encurtador_test` e o Redis
+ * db 1 e fazem TRUNCATE/FLUSHDB entre os testes. Dentro de um pacote o vitest já roda um arquivo
+ * por vez, mas dois pacotes ao mesmo tempo (`pnpm -r test:integration`, ou dois terminais) apagavam
+ * os dados um do outro no meio do teste. O globalSetup de cada pacote segura este advisory lock
+ * (sessão própria, no banco `postgres`) até o fim da suíte; quem chega depois espera.
+ */
+export async function holdTestSuiteLock(): Promise<() => Promise<void>> {
+  const { adminUrl } = resolveTestUrls();
+  const url = new URL(adminUrl);
+  url.pathname = '/postgres';
+  const conn = postgres(url.href, { max: 1, onnotice: () => {}, idle_timeout: 0 });
+  const key = 'encurtador_test:suite';
+  const [row] = await conn<{ ok: boolean }[]>`SELECT pg_try_advisory_lock(hashtext(${key})) AS ok`;
+  if (!row?.ok) {
+    console.log('[test] outra suíte de integração está usando encurtador_test; esperando…');
+    await conn`SELECT pg_advisory_lock(hashtext(${key}))`;
+  }
+  return async () => {
+    await conn`SELECT pg_advisory_unlock(hashtext(${key}))`.catch(() => {});
+    await conn.end({ timeout: 5 });
+  };
+}
+
 /** Aplica as migrações de `packages/db/drizzle` no banco da URL. */
 export async function migrateDatabase(url: string): Promise<void> {
   const conn = postgres(url, { max: 1, onnotice: () => {} });

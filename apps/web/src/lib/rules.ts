@@ -11,6 +11,15 @@ export const DEVICE_LABEL: Record<DeviceMatch, string> = {
   desktop: 'Computador',
 };
 
+/** O aparelho dentro da frase ("No iPhone e iPad", "No celular"): nomes próprios ficam como são. */
+const DEVICE_IN_SENTENCE: Record<DeviceMatch, string> = {
+  ios: 'iPhone e iPad',
+  android: 'Android',
+  mobile: 'celular',
+  tablet: 'tablet',
+  desktop: 'computador',
+};
+
 export type ChipTone = 'neutro' | 'aviso' | 'negativo';
 
 export interface RuleChip {
@@ -104,7 +113,7 @@ export function ruleChips(link: Link | LinkListItem, now = Date.now()): RuleChip
       key: `device-${i}`,
       text: `${DEVICE_LABEL[d.match]} → ${pathOrHost(d.url)}`,
       tone: 'neutro',
-      sentence: `No ${DEVICE_LABEL[d.match].toLowerCase()}, vai para ${hostOf(d.url)}.`,
+      sentence: `No ${DEVICE_IN_SENTENCE[d.match]}, vai para ${hostOf(d.url)}.`,
     });
   }
   if (link.redirect_type !== 302) {

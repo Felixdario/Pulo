@@ -143,12 +143,21 @@
   gap: var(--esp-6);
   padding: var(--esp-3) var(--esp-4) calc(var(--esp-4) + env(safe-area-inset-bottom));
   background: var(--papel);
-  transition: opacity 200ms var(--ease-saida);
+  transition:
+    opacity 200ms var(--ease-saida),
+    transform 200ms var(--ease-saida);
 }
 
+/* Desce 8 px a partir da barra onde fica o botão do menu (review-animations: um fade puro não diz
+   de onde a folha veio); a saída é mais curta. */
 .menu-movel[data-starting-style],
 .menu-movel[data-ending-style] {
   opacity: 0;
+  transform: translateY(-8px);
+}
+
+.menu-movel[data-ending-style] {
+  transition-duration: 120ms;
 }
 
 .menu-movel-topo {
@@ -338,7 +347,7 @@
   background: transparent;
   color: var(--suave);
   font-weight: 500;
-  transition: background-color var(--dur-retorno) ease;
+  /* Sem transição: o período e o status trocam com as setas do teclado (review-animations). */
 }
 
 .segmento[aria-pressed='true'],
@@ -360,6 +369,11 @@
 .tabela-quadro {
   position: relative;
   overflow-x: auto;
+}
+
+/* O quadro rola e recebe foco: o anel fica por dentro, sem ser cortado pela folha. */
+.tabela-quadro:focus-visible {
+  outline-offset: -2px;
 }
 
 .tabela {
@@ -425,6 +439,10 @@
   }
 }
 
+.col-num-unidade {
+  display: none;
+}
+
 .linha-inativa .curto-slug,
 .linha-inativa .col-num,
 .linha-inativa .destino {
@@ -437,8 +455,11 @@
 
 .linha-curto {
   display: inline-block;
-  white-space: nowrap;
-  max-width: 100%;
+  /* O slug é a identidade da linha: um alias de 64 caracteres quebra em vez de empurrar as colunas
+     de número e ações para fora da tabela (break-ui). */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 40ch;
   text-decoration: none;
   border-radius: var(--raio-chip);
 }
@@ -465,22 +486,19 @@
   font-weight: 600;
 }
 
+/* O destino chega cortado no meio (middleTruncate); a reticência do fim só entra se a fonte de
+   fallback for mais larga. Antes, o fim era cortado seco, sem reticência (break-ui). */
 .destino {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
   max-width: 32ch;
   overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--suave);
 }
 
 .tabela .col-regras {
   max-width: 280px;
-}
-
-.destino {
-  max-width: 28ch;
 }
 
 .linha-acoes {
@@ -1187,6 +1205,11 @@
   padding: 0;
 }
 
+/* Escopos que quebram em duas linhas não encostam no fio da linha (break-ui). */
+.folha-tabela .tabela td {
+  padding-block: var(--esp-2);
+}
+
 .chave-form {
   display: grid;
   gap: var(--esp-4);
@@ -1436,8 +1459,8 @@
     grid-row: 1;
     text-align: right;
   }
-  .lista .col-num::after {
-    content: ' humanos';
+  .lista .col-num-unidade {
+    display: inline;
     color: var(--suave);
     font-size: var(--fs-rotulo);
   }
@@ -1459,6 +1482,9 @@
     grid-column: 2;
     grid-row: 3;
     text-align: right;
+    /* O `width: 1%` da tabela larga deixava a célula com 1 px e as ações vazando dela: Copiar e
+       "Mais ações" mudavam de lugar conforme a largura do número da linha (break-ui). */
+    width: auto;
   }
   .lista .col-acoes:empty,
   .lista .col-regras:has(.apagada) {
@@ -1466,8 +1492,7 @@
   }
   .lista .linha-curto {
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: none;
   }
   .lista .linha-curto .curto {
     font-size: 15px;
@@ -1517,6 +1542,11 @@
     font-size: 20px;
     line-height: 26px;
   }
+  /* Em 390 px, os quatro botões cabem numa linha só sem os ícones de QR e Editar (antes o "Mais
+     ações" caía sozinho na segunda linha). */
+  .link-acoes .btn-secundario svg {
+    display: none;
+  }
   .ao-vivo {
     width: 100%;
   }
@@ -1560,6 +1590,10 @@
   }
   .dim-barra > span {
     transition: none;
+  }
+  .menu-movel[data-starting-style],
+  .menu-movel[data-ending-style] {
+    transform: none;
   }
 }
 

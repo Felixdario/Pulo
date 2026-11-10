@@ -537,22 +537,31 @@ describe('GET /v1/links (lista)', () => {
   it('filtros q, status, has_password e datas; cursor de outro filtro → 422', async () => {
     const app = await t.app();
     const s = await signup(app);
-    await createLink(app, s, { title: 'Campanha Verão', password: 'abcd' });
+    // Aliases fixos: um slug aleatório pode conter "ver" (ILIKE sem caixa) e entrar no q=ver.
+    const first = await createLink(app, s, {
+      title: 'Campanha Verão',
+      password: 'abcd',
+      alias: 'filtro-a',
+    });
     await createLink(app, s, {
       title: 'Outro',
       destination: 'https://loja.example.com/verao_100%',
+      alias: 'filtro-b',
     });
-    const off = await createLink(app, s, { title: 'Desligado' });
+    const off = await createLink(app, s, { title: 'Desligado', alias: 'filtro-c' });
     await app.inject({
       method: 'PATCH',
       url: `/v1/links/${off.id}`,
       headers: s.auth,
       payload: { status: 'disabled' },
     });
-    const exp = await createLink(app, s, { title: 'Expirado' });
+    const exp = await createLink(app, s, { title: 'Expirado', alias: 'filtro-d' });
+    // Relógio do banco, com folga: o filtro compara com now() do Postgres, e o relógio da VM do
+    // Docker (WSL2) pode ficar segundos atrás do Windows. Com Date.now() - 1 s o link às vezes
+    // ainda não estava vencido para o banco.
     await t.db
       .update(links)
-      .set({ expiresAt: new Date(Date.now() - 1000) })
+      .set({ expiresAt: sql`now() - interval '1 hour'` })
       .where(eq(links.id, exp.id));
 
     const titles = async (q: string) =>
@@ -567,12 +576,17 @@ describe('GET /v1/links (lista)', () => {
     expect(await titles('status=expired')).toEqual(['Expirado']);
     expect(await titles('status=active')).toEqual(['Campanha Verão', 'Outro']);
     expect(await titles('has_password=true')).toEqual(['Campanha Verão']);
-    const today = new Date().toISOString().slice(0, 10);
-    expect(await titles(`created_from=${today}&created_to=${today}`)).toHaveLength(4);
+    // O dia UTC de criação vem do banco (created_at), não do relógio do processo de teste.
+    const [created] = await t.db
+      .select({ day: sql<string>`to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD')` })
+      .from(links)
+      .where(eq(links.id, first.id));
+    const day = created!.day;
+    expect(await titles(`created_from=${day}&created_to=${day}`)).toHaveLength(4);
     expect(await titles('created_to=2020-01-01')).toEqual([]);
 
-    const first = await app.inject({ method: 'GET', url: '/v1/links?limit=1', headers: s.auth });
-    const cursor = first.json().next_cursor;
+    const page1 = await app.inject({ method: 'GET', url: '/v1/links?limit=1', headers: s.auth });
+    const cursor = page1.json().next_cursor;
     expectProblem(
       await app.inject({
         method: 'GET',

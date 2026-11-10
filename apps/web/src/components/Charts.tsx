@@ -100,6 +100,8 @@ export function SeriesChart({
   const max = Math.max(0, ...points.map((p) => Math.max(p.humans, p.uniques ?? 0)));
   const ticks = niceTicks(max);
   const step = Math.max(1, Math.ceil(points.length / 7));
+  // A largura do eixo y acompanha o maior rótulo ("300 mil" não cabe nos 44 px de "20 mil").
+  const yWidth = Math.max(32, Math.max(...ticks.map((t) => numCompact(t).length)) * 7 + 10);
   return (
     <div className="serie" aria-hidden="true">
       <ResponsiveContainer width="100%" height={260}>
@@ -124,7 +126,7 @@ export function SeriesChart({
             tickFormatter={(v: number) => numCompact(v)}
             tickLine={false}
             axisLine={false}
-            width={44}
+            width={yWidth}
             className="serie-eixo"
             allowDecimals={false}
           />
@@ -159,10 +161,15 @@ export function SeriesChart({
   );
 }
 
+/** Fecha a frase com ponto, sem dobrar o ponto de uma abreviação ("10 de nov."). */
+export function endSentence(s: string): string {
+  return s.endsWith('.') ? s : `${s}.`;
+}
+
 /** Resumo em texto e tabela equivalente (DESIGN.md > Accessibility). */
 export function seriesSummary(points: SeriesPoint[], g: Granularity, range: string): string {
   const total = points.reduce((a, p) => a + p.humans, 0);
-  if (total === 0) return `Nenhum clique humano ${range}.`;
+  if (total === 0) return endSentence(`Nenhum clique humano ${range}`);
   const peak = points.reduce((a, p) => (p.humans > a.humans ? p : a), points[0]!);
   return `${num(total)} cliques humanos ${range}, pico de ${num(peak.humans)} em ${pointLabel(peak.label, g, true)}.`;
 }
@@ -177,7 +184,12 @@ export function SeriesTable({
   showUniques: boolean;
 }) {
   return (
-    <div className="tabela-quadro tabela-serie">
+    <div
+      className="tabela-quadro tabela-serie"
+      tabIndex={0}
+      role="region"
+      aria-label="Tabela da série"
+    >
       <table className="tabela tabela-compacta">
         <thead>
           <tr>
@@ -320,10 +332,17 @@ export function dimensionLabel(dim: string, value: string): string {
     return `${city}, ${country}`;
   }
   if (dim === 'device') {
-    return { mobile: 'Celular', tablet: 'Tablet', desktop: 'Computador' }[value] ?? value;
+    return (
+      {
+        mobile: 'Celular',
+        tablet: 'Tablet',
+        desktop: 'Computador',
+        other: 'TV, console e outros',
+      }[value] ?? value
+    );
   }
   if (dim === 'os') {
-    return { ios: 'iOS', android: 'Android', other: 'Outros' }[value] ?? value;
+    return { ios: 'iOS', android: 'Android', other: 'Outro sistema' }[value] ?? value;
   }
   return value;
 }
@@ -348,7 +367,7 @@ export function DimensionList({
     <ol className="lista-dim">
       {items.map((i, k) => (
         <li key={i.value} className={k === 0 ? 'dim dim-primeiro' : 'dim'}>
-          <span className="dim-nome">
+          <span className="dim-nome" title={dimensionLabel(dim, i.value)}>
             {showCode && /^[A-Z]{2}$/.test(i.value) && (
               <span className="dim-codigo mono">{i.value}</span>
             )}

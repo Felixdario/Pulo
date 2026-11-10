@@ -1,7 +1,7 @@
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { createKey, createLink, expectProblem, setup, signup } from './helpers';
+import { createKey, createLink, expectProblem, LIVE_PREFIX, setup, signup } from './helpers';
 
 const t = setup();
 beforeEach(() => t.reset());
@@ -65,21 +65,30 @@ describe('SSE ao vivo', () => {
     await sse.waitFor(/event: ready/);
     // Mesmo formato do worker (ADR 0003).
     await t.redis.publish(
-      `live:${s.userId}`,
+      `${LIVE_PREFIX}${s.userId}`,
       JSON.stringify({ link_id: l2.id, humans: 9, total: 9 }),
     );
     await t.redis.publish(
-      `live:${s.userId}`,
+      `${LIVE_PREFIX}${s.userId}`,
       JSON.stringify({ link_id: l1.id, humans: 1, total: 2 }),
     );
     await t.redis.publish(
-      `live:${s.userId + 999}`,
+      `${LIVE_PREFIX}${s.userId + 999}`,
       JSON.stringify({ link_id: l1.id, humans: 5, total: 5 }),
+    );
+    // O canal do dev (prefixo padrão `live:`) não chega no teste, nem o do teste no dev.
+    await t.redis.publish(
+      `live:${s.userId}`,
+      JSON.stringify({ link_id: l1.id, humans: 7, total: 7 }),
     );
     const text = await sse.waitFor(/event: click\ndata: \{"link_id":\d+,"humans":1,"total":2\}/);
     expect(text).not.toContain('"humans":9');
     expect(text).not.toContain('"humans":5');
-    await sse.waitFor(/: heartbeat/);
+    expect(text).not.toContain('"humans":7');
+    // Depois do heartbeat (100 ms), as publicações anteriores já teriam chegado.
+    // Evento nomeado (o EventSource não expõe comentários; o cliente vigia o heartbeat).
+    const later = await sse.waitFor(/event: heartbeat\ndata: \n\n/);
+    expect(later).not.toMatch(/"humans":(5|7|9)/);
     // O ticket foi consumido.
     expect(await t.redis.exists(`lt:${ticket}`)).toBe(0);
     sse.close();
@@ -121,7 +130,9 @@ describe('SSE ao vivo', () => {
     const a = await open();
     const b = await open();
     const subs = async () =>
-      ((await t.redis.call('PUBSUB', 'NUMSUB', `live:${s.userId}`)) as [string, number])[1];
+      (
+        (await t.redis.call('PUBSUB', 'NUMSUB', `${LIVE_PREFIX}${s.userId}`)) as [string, number]
+      )[1];
     expect(await subs()).toBe(1);
     a.close();
     await new Promise((r) => setTimeout(r, 100));

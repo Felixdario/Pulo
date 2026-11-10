@@ -64,8 +64,14 @@ ideal para o BRIN.
 
 ## Consequências
 
-- **Retenção da bruta:** passa a ser feita com `DETACH` + `DROP` por mês. Falta uma
-  `drop_old_click_partitions(meses)`, irmã de `drop_old_visitor_partitions`; fica para a fase 8.
+- **Retenção da bruta:** passa a ser feita com `DETACH` + `DROP` por mês, pela função
+  `drop_old_click_partitions(meses)` (migração 0004, fase 8).
+  - O `DETACH` é o comum, com `lock_timeout` de 3 s. O `CONCURRENTLY` não serve aqui por três motivos:
+    o Postgres o recusa quando existe partição DEFAULT, e ele também não roda dentro de transação nem
+    de função.
+  - O worker chama a função a cada 12 h só quando `CLICK_RETENTION_MONTHS` está definido; por padrão,
+    nunca apaga.
+  - Os agregados do dashboard são mantidos.
 - **Índice errado piora as coisas.** O índice composto deixa a visão da conta 2,4 vezes mais lenta
   quente e 4,8 vezes mais lenta fria, porque o planejador troca a varredura sequencial por milhares de
   leituras aleatórias. É mais um motivo para o dashboard não ler da bruta.

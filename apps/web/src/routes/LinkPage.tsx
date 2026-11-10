@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import {
   CountryMap,
   DimensionList,
+  endSentence,
   SeriesChart,
   SeriesTable,
   seriesSummary,
@@ -322,6 +323,8 @@ export function LinkPage() {
   // ---------------------------------------------------------------- ao vivo
   const [recent, setRecent] = useState<{ t: number; n: number }[]>([]);
   const [pulse, setPulse] = useState(0);
+  const [received, setReceived] = useState(0);
+  const lastPulse = useRef(0);
   const [now, setNow] = useState(() => Date.now());
   const resync = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -343,7 +346,11 @@ export function LinkPage() {
           ...r.filter((x) => Date.now() - x.t < 60_000),
           { t: Date.now(), n: c.humans },
         ]);
-        setPulse((p) => p + 1);
+        setReceived((n) => n + c.humans);
+        if (Date.now() - lastPulse.current >= 2_000) {
+          lastPulse.current = Date.now();
+          setPulse((p) => p + 1);
+        }
         setNow(Date.now());
       }
       // Depois de uma rajada, relê série e dimensões (os bots e prévias vêm separados de lá).
@@ -419,8 +426,13 @@ export function LinkPage() {
     const err = linkQ.error as ApiError;
     return (
       <div className="tela-conteudo">
+        {/* Só 404 e 410 dizem que o link não existe; 429, 5xx e falta de rede não (break-ui). */}
         <h1 className="titulo-tela">
-          {err.status === 410 ? 'Este link foi apagado' : 'Link não encontrado'}
+          {err.status === 410
+            ? 'Este link foi apagado'
+            : err.status === 404
+              ? 'Link não encontrado'
+              : 'Não deu para abrir este link'}
         </h1>
         <ErrorBlock
           message={
@@ -428,7 +440,7 @@ export function LinkPage() {
               ? 'Ele não está mais na sua conta.'
               : err.message
           }
-          {...(err.status >= 500 || err.status === 0
+          {...(err.status >= 500 || err.status === 0 || err.status === 429
             ? { onRetry: () => void linkQ.refetch() }
             : {})}
         />
@@ -536,6 +548,7 @@ export function LinkPage() {
           today={todaySummary.data?.humans}
           lastMinute={lastMinute}
           pulse={pulse}
+          received={received}
           state={live.state}
           pausedAt={live.pausedAt}
           onResume={live.resume}
@@ -642,7 +655,9 @@ export function LinkPage() {
                 />
               )}
               {series.data.totals.humans === 0 && (
-                <p className="suave serie-vazia">Nenhum clique humano {rangeLabel}.</p>
+                <p className="suave serie-vazia">
+                  {endSentence(`Nenhum clique humano ${rangeLabel}`)}
+                </p>
               )}
             </>
           )}

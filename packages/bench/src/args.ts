@@ -14,6 +14,12 @@ export interface SeedOptions {
   seed: number;
   /** `series` (INSERT … SELECT generate_series no servidor) ou `copy` (COPY FROM STDIN do Node). */
   method: 'series' | 'copy';
+  /**
+   * Cliques extras num link próprio do usuário `bench@encurta.dev` (`pior-caso-5m`), para ver a
+   * interface com um link de milhões de cliques (fase 8, break-ui). 0 = desligado (padrão); o total
+   * de cliques vira `clicks + hot`.
+   */
+  hot: number;
   /** Carrega a bruta com a PK e o índice no lugar (só para medir contra o padrão, que os recria depois). */
   keepIndexes: boolean;
 }
@@ -27,9 +33,10 @@ export const DEFAULT_SEED_OPTIONS: SeedOptions = {
   seed: 42,
   method: 'series',
   keepIndexes: false,
+  hot: 0,
 };
 
-const INT_KEYS = ['clicks', 'months', 'links', 'users', 'jobs', 'seed'] as const;
+const INT_KEYS = ['clicks', 'months', 'links', 'users', 'jobs', 'seed', 'hot'] as const;
 type IntKey = (typeof INT_KEYS)[number];
 
 function parseCount(key: string, raw: string): number {

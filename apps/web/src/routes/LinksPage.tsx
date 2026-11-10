@@ -10,7 +10,7 @@ import { QrDialog } from '../components/Qr';
 import { Confirm, CopyButton, ErrorBlock, RuleChips, ShortLink } from '../components/ui';
 import { ApiError } from '../lib/api/problem';
 import type { LinkListItem, LinkPage } from '../lib/api/types';
-import { dateShort, middleTruncate, num, prettyUrl } from '../lib/format';
+import { dateShort, middleTruncate, num, prettyUrl, timeOnly } from '../lib/format';
 import { useDebounced, useDocumentTitle } from '../lib/hooks';
 import { ruleChips } from '../lib/rules';
 import { api } from '../lib/session';
@@ -288,11 +288,13 @@ function Row({ link }: { link: LinkListItem }) {
         <Link to="/app/links/$id" params={{ id: String(link.id) }} className="linha-curto">
           <ShortLink url={link.short_url} />
         </Link>
-        <span className="linha-titulo suave">{link.title ?? prettyUrl(link.destination)}</span>
+        <span className="linha-titulo suave" title={link.title ?? prettyUrl(link.destination)}>
+          {link.title ?? prettyUrl(link.destination)}
+        </span>
       </td>
       <td className="col-destino">
-        <span className="destino" title={link.destination}>
-          {middleTruncate(prettyUrl(link.destination), 40)}
+        <span className="destino" title={prettyUrl(link.destination)}>
+          {middleTruncate(prettyUrl(link.destination), 34)}
         </span>
       </td>
       <td className="col-regras">
@@ -302,7 +304,13 @@ function Row({ link }: { link: LinkListItem }) {
           <span className="apagada">—</span>
         )}
       </td>
-      <td className="col-num num">{num(link.click_count)}</td>
+      <td className="col-num num">
+        {num(link.click_count)}
+        {/* Só no celular, onde a coluna perde o cabeçalho. */}
+        <span className="col-num-unidade" aria-hidden="true">
+          {link.click_count === 1 ? ' humano' : ' humanos'}
+        </span>
+      </td>
       <td className="col-data suave">{dateShort(link.created_at)}</td>
       <td className="col-acoes">
         <RowActions link={link} />
@@ -388,7 +396,8 @@ export function LinksPage() {
           Seus links
         </h2>
         <Filters key={search.q ?? ''} search={search} />
-        {links.isError && !links.data ? (
+        {/* Busca nova que falhou mostra o erro, não a lista da busca anterior (placeholder). */}
+        {links.isError && (!links.data || links.isPlaceholderData) ? (
           <ErrorBlock
             message={`Não deu para carregar os links. ${(links.error as ApiError).message}`}
             onRetry={() => void links.refetch()}
@@ -429,7 +438,7 @@ export function LinksPage() {
             )}
           </div>
         ) : (
-          <div className="tabela-quadro">
+          <div className="tabela-quadro" tabIndex={0} role="region" aria-label="Tabela de links">
             <table className="tabela" aria-busy={links.isFetching || undefined}>
               <thead>
                 <tr>
@@ -468,16 +477,24 @@ export function LinksPage() {
               {isFetchingNextPage ? 'Carregando…' : 'Carregar mais'}
             </button>
           )}
-          {!hasNextPage && items.length > 0 && (
+          {!hasNextPage && items.length > 0 && !links.isError && (
             <p className="rotulo apagada">
               {items.length === 1 ? '1 link' : `${num(items.length)} links`}
               {filtered ? ' com esses filtros' : ''}. Fim da lista.
             </p>
           )}
-          {links.isError && links.data && (
+          {/* A página seguinte falhou: a lista carregada fica, e o pé oferece tentar de novo. */}
+          {links.isFetchNextPageError && (
             <ErrorBlock
-              message="Não deu para carregar mais links."
+              message={`Não deu para carregar mais links. ${(links.error as ApiError).message}`}
               onRetry={() => void fetchNextPage()}
+            />
+          )}
+          {/* A atualização em segundo plano falhou (sem rede, por exemplo): mostra o que já tinha. */}
+          {links.isRefetchError && !links.isPlaceholderData && (
+            <ErrorBlock
+              message={`Não deu para atualizar a lista; estes são os links carregados às ${timeOnly(new Date(links.dataUpdatedAt))}. ${(links.error as ApiError).message}`}
+              onRetry={() => void links.refetch()}
             />
           )}
         </div>

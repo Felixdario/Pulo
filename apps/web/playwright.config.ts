@@ -33,6 +33,14 @@ const env: Record<string, string> = {
   GEO_CITY_MMDB: geo('dbip-city-lite.mmdb'),
   GEO_COUNTRY_MMDB: geo('dbip-country-lite.mmdb'),
   LOG_LEVEL: 'warn',
+  // O Pub/Sub do Redis ignora o db: sem prefixo próprio, o demo (user 1) do e2e e o do dev
+  // ouviriam os cliques um do outro.
+  LIVE_CHANNEL_PREFIX: 'e2e-live:',
+  // Um usuário (o demo) faz a suíte inteira: com o balde do ADR (120, +2/s), os testes de a11y e de
+  // teclado da fase 8 esgotavam o limite e os seguintes recebiam 429. O limite tem teste próprio na
+  // integração da API.
+  API_RATE_LIMIT_CAPACITY: '5000',
+  API_RATE_LIMIT_REFILL: '100',
 };
 
 const esperar = 'corepack pnpm --dir ../.. exec tsx apps/web/e2e/esperar.ts';
@@ -87,7 +95,8 @@ export default defineConfig({
       name: 'web',
       command: 'corepack pnpm exec vite build --logLevel warn && corepack pnpm exec vite preview',
       url: WEB_URL,
-      env,
+      // O build é de produção (React de produção e sem o painel de pior caso do dev).
+      env: { ...env, NODE_ENV: 'production' },
       reuseExistingServer: false,
       timeout: 180_000,
     },

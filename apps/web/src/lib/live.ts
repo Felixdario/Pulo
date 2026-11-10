@@ -12,6 +12,12 @@ export type LiveState = 'connecting' | 'open' | 'reconnecting' | 'paused';
 
 const BACKOFF = [1000, 2000, 4000, 8000, 15000];
 const MAX_FAILURES = 6;
+/**
+ * O servidor manda `heartbeat` a cada 15 s. Sem nenhum evento por 40 s, a conexão é dada como morta
+ * e refeita: com a API fora do ar atrás de um proxy (o do Vite, um nginx), o socket do navegador
+ * pode ficar aberto sem erro, e a tela dizia "Ao vivo" para sempre (break-ui).
+ */
+const SILENCE_MS = 40_000;
 
 export interface LiveHandlers {
   onClick: (c: LiveClick) => void;
@@ -33,11 +39,20 @@ export function useLive(linkId: number, handlers: LiveHandlers) {
     let timer: ReturnType<typeof setTimeout> | null = null;
     let failures = 0;
     let stopped = false;
+    let watchdog: ReturnType<typeof setTimeout> | null = null;
+
+    const alive = (source: EventSource) => {
+      if (watchdog) clearTimeout(watchdog);
+      watchdog = setTimeout(() => {
+        if (es === source) retry();
+      }, SILENCE_MS);
+    };
 
     const pause = () => {
       es?.close();
       es = null;
       if (timer) clearTimeout(timer);
+      if (watchdog) clearTimeout(watchdog);
       setState('paused');
       setPausedAt(new Date());
     };
@@ -45,6 +60,7 @@ export function useLive(linkId: number, handlers: LiveHandlers) {
     const retry = () => {
       es?.close();
       es = null;
+      if (watchdog) clearTimeout(watchdog);
       if (stopped) return;
       failures += 1;
       if (failures >= MAX_FAILURES || !navigator.onLine) return pause();
@@ -64,12 +80,16 @@ export function useLive(linkId: number, handlers: LiveHandlers) {
       const url = `${api.baseUrl}/v1/live?ticket=${encodeURIComponent(ticket)}&link_id=${linkId}`;
       const source = new EventSource(url);
       es = source;
+      alive(source);
+      source.addEventListener('heartbeat', () => alive(source));
       source.addEventListener('ready', () => {
+        alive(source);
         failures = 0;
         setState('open');
         handlersRef.current.onReady?.();
       });
       source.addEventListener('click', (ev) => {
+        alive(source);
         try {
           handlersRef.current.onClick(JSON.parse((ev as MessageEvent<string>).data) as LiveClick);
         } catch {
@@ -89,6 +109,7 @@ export function useLive(linkId: number, handlers: LiveHandlers) {
       stopped = true;
       window.removeEventListener('offline', offline);
       if (timer) clearTimeout(timer);
+      if (watchdog) clearTimeout(watchdog);
       es?.close();
     };
   }, [linkId, generation]);

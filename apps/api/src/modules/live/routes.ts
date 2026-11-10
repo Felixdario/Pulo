@@ -58,7 +58,7 @@ export function liveRoutes(app: FastifyInstance, ctx: Ctx, hub: LiveHub) {
         tags,
         summary: 'Cliques ao vivo (text/event-stream)',
         description:
-          'Eventos `click` com `{ link_id, humans, total }` por lote do worker, filtrados por `link_id` se dado; comentário de heartbeat a cada 15 s. O ticket é consumido na abertura (GETDEL).',
+          'Eventos `click` com `{ link_id, humans, total }` por lote do worker, filtrados por `link_id` se dado; evento `heartbeat` (sem dados) a cada 15 s, para o cliente notar uma conexão morta. O ticket é consumido na abertura (GETDEL).',
         querystring: z
           .object({
             ticket: z.string().min(1).max(200),
@@ -100,7 +100,12 @@ export function liveRoutes(app: FastifyInstance, ctx: Ctx, hub: LiveHub) {
       });
       streams.add(raw);
 
-      const heartbeat = setInterval(() => send(': heartbeat\n\n'), ctx.config.liveHeartbeatMs);
+      // Evento nomeado, não comentário: o EventSource não expõe comentários, e o cliente precisa ver
+      // o heartbeat para notar uma conexão que morreu sem fechar (um proxy no meio segura o socket).
+      const heartbeat = setInterval(
+        () => send('event: heartbeat\ndata: \n\n'),
+        ctx.config.liveHeartbeatMs,
+      );
       const cleanup = () => {
         if (closed) return;
         closed = true;
@@ -111,7 +116,7 @@ export function liveRoutes(app: FastifyInstance, ctx: Ctx, hub: LiveHub) {
       req.raw.on('close', cleanup);
       raw.on('close', cleanup);
 
-      unsubscribe = await hub.subscribe(`live:${userId}`, (message) => {
+      unsubscribe = await hub.subscribe(`${ctx.config.liveChannelPrefix}${userId}`, (message) => {
         if (linkId !== undefined) {
           try {
             if ((JSON.parse(message) as { link_id?: number }).link_id !== linkId) return;

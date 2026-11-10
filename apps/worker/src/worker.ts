@@ -7,7 +7,13 @@ import type { Sql } from 'postgres';
 import type { WorkerConfig } from './config';
 import { enrich, fieldsToRecord, parseEvent, UaCache, type ClickEvent } from './events';
 import { createMetrics, type Metrics } from './metrics';
-import { ensurePartitions, insertBatch, isTransient, type BatchResult } from './sql';
+import {
+  dropOldClickPartitions,
+  ensurePartitions,
+  insertBatch,
+  isTransient,
+  type BatchResult,
+} from './sql';
 
 type Entry = [id: string, fields: string[]];
 
@@ -119,9 +125,12 @@ export class ClickWorker {
     await this.ensureGroup();
     const created = await ensurePartitions(sql);
     if (created > 0) log.info({ created }, 'partições criadas');
+    await this.retention();
     this.partitionTimer = setInterval(
       () =>
-        void ensurePartitions(sql).catch((err) => log.error({ err }, 'falha ao criar partições')),
+        void ensurePartitions(sql)
+          .catch((err) => log.error({ err }, 'falha ao criar partições'))
+          .then(() => this.retention()),
       12 * 3600 * 1000,
     );
     this.partitionTimer.unref();
@@ -166,6 +175,26 @@ export class ClickWorker {
         { pending: this.inFlight.size },
         'encerramento passou do prazo; saindo sem confirmar o lote em andamento',
       );
+    }
+  }
+
+  /**
+   * Retenção da bruta (desligada por padrão). Roda na partida e junto da manutenção de partições, a
+   * cada 12 h. Falha (lock_timeout com um lote em andamento, por exemplo) só é registrada: a
+   * próxima rodada tenta de novo, e nada do caminho dos cliques depende dela.
+   */
+  async retention(): Promise<number> {
+    const { config, sql, log } = this.d;
+    if (config.clickRetentionMonths === null) return 0;
+    try {
+      const dropped = await dropOldClickPartitions(sql, config.clickRetentionMonths);
+      if (dropped > 0) {
+        log.info({ dropped, months: config.clickRetentionMonths }, 'partições antigas apagadas');
+      }
+      return dropped;
+    } catch (err) {
+      log.error({ err }, 'falha na retenção da bruta');
+      return 0;
     }
   }
 
@@ -348,7 +377,10 @@ export class ClickWorker {
     for (const [userId, perLink] of live) {
       for (const [linkId, c] of perLink) {
         void this.d.redis
-          .publish(`live:${userId}`, JSON.stringify({ link_id: Number(linkId), ...c }))
+          .publish(
+            `${this.d.config.liveChannelPrefix}${userId}`,
+            JSON.stringify({ link_id: Number(linkId), ...c }),
+          )
           .catch(() => {});
       }
     }

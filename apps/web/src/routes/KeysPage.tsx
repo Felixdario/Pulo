@@ -62,7 +62,7 @@ function CreateKey({ onCreated }: { onCreated: (k: CreatedApiKey) => void }) {
           aria-describedby={nameError ? `${ids.nome}-e` : undefined}
         />
         {nameError && (
-          <p id={`${ids.nome}-e`} className="campo-erro">
+          <p id={`${ids.nome}-e`} className="campo-erro" role="alert">
             {nameError}
           </p>
         )}
@@ -86,7 +86,7 @@ function CreateKey({ onCreated }: { onCreated: (k: CreatedApiKey) => void }) {
           </label>
         ))}
         {scopesError && (
-          <p id={`${ids.escopos}-e`} className="campo-erro">
+          <p id={`${ids.escopos}-e`} className="campo-erro" role="alert">
             {scopesError}
           </p>
         )}
@@ -253,7 +253,7 @@ export function KeysPage() {
               Nenhuma chave ativa. Crie uma acima quando precisar.
             </p>
           ) : (
-            <div className="tabela-quadro">
+            <div className="tabela-quadro" tabIndex={0} role="region" aria-label="Chaves ativas">
               <table className="tabela">
                 <thead>
                   <tr>

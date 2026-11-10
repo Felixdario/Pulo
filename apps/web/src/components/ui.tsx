@@ -32,6 +32,8 @@ export function ShortLink({
       <span className="sr-only">{spellSlug(host, slug)}</span>
       <span aria-hidden="true">
         <span className="curto-host">{host}</span>
+        {/* Se não couber, quebra entre o domínio e o slug, nunca no meio do slug curto. */}
+        <wbr />
         <span className="curto-slug">{slug}</span>
       </span>
     </As>

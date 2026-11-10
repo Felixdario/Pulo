@@ -13,6 +13,9 @@ import { api, DEMO, login, useSession } from '../lib/session';
 import { completeUrl, looksLikeUrl } from '../lib/validation';
 import { pageTitle } from '../title';
 
+/** Swagger UI da API. A barra final faz os assets relativos (`./static/…`) passarem pelo proxy. */
+const API_DOCS_URL = import.meta.env.VITE_API_DOCS_URL || '/api/docs/';
+
 const PLACEHOLDER = 'https://sualoja.com.br/black-friday?utm_source=instagram';
 
 type Phase = 'form' | 'colando' | 'resultado';
@@ -187,7 +190,8 @@ function ResultStrip({
             <span className="sr-only">{spellSlug(host, slug)}</span>
             <span aria-hidden="true">
               <span className="tira-curto-host">{host}</span>
-              {slug}
+              <wbr />
+              <span className="tira-curto-slug">{slug}</span>
             </span>
           </p>
         </div>
@@ -468,7 +472,7 @@ export function Landing() {
           <nav aria-label="Rodapé" className="rodape-nav">
             <Link to="/entrar">Entrar</Link>
             <Link to="/criar-conta">Criar conta</Link>
-            <a href="/api/docs">Documentação da API</a>
+            <a href={API_DOCS_URL}>Documentação da API</a>
           </nav>
           <DbipCredit className="rodape-credito" />
           <p className="rotulo">Projeto de portfólio. Sem clientes, sem preço, sem depoimento.</p>

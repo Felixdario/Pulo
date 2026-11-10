@@ -597,17 +597,19 @@ uma frase: "Só humanos entram no total e no limite de cliques."
 Implementado na fase 7 com `emil-design-eng` e `animate`. Os valores usados (tokens em `tokens.css`):
 `--ease-saida` `cubic-bezier(0.2, 0.8, 0.2, 1)`, `--dur-retorno` 160 ms e `--dur-assinatura` 420 ms.
 
-| Movimento                | Ferramenta                                         | Valores                                                                                       |
-| ------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Tira com a URL longa sai | transição CSS (troca de classe)                    | `translateY(8px)` e opacidade, 180 ms, `--ease-saida`                                         |
-| Tira nova é colada       | animação CSS (rara: uma vez por envio)             | de `rotate(-3deg) scale(1.02)` e opacidade 0 para `rotate(-1.5deg)`, 420 ms                   |
-| Link condensa            | animação CSS de `font-variation-settings`          | `wdth` 100 → 62, 420 ms                                                                       |
-| Papel endireita          | transição CSS                                      | `rotate(0)` no foco (sempre) e no hover (só ponteiro fino), 160 ms, `ease`                    |
-| Pressionar               | transição CSS                                      | `scale(0.97)`, 160 ms                                                                         |
-| Menus e dicas            | transição CSS com `data-starting-style` do Base UI | `scale(0.96)` e opacidade a partir do gatilho (`--transform-origin`), 160 ms; saída em 100 ms |
-| Diálogos                 | idem                                               | centrados, `scale(0.97)` e opacidade, 200 ms (no celular sobem 24 px, como folha)             |
-| Delta do ao vivo         | animação CSS que renasce a cada clique (`key`)     | fundo rosa a 22 % → transparente, 600 ms; o número troca sem animar                           |
-| Barras das dimensões     | transição CSS                                      | `scaleX`, 200 ms, quando o período muda                                                       |
+| Movimento                | Ferramenta                                         | Valores                                                                                              |
+| ------------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Tira com a URL longa sai | transição CSS (troca de classe)                    | `translateY(8px)` e opacidade, 180 ms, `--ease-saida`                                                |
+| Tira nova é colada       | animação CSS (rara: uma vez por envio)             | de `rotate(-3deg) scale(1.02)` e opacidade 0 para `rotate(-1.5deg)`, 420 ms                          |
+| Link condensa            | animação CSS de `font-variation-settings`          | `wdth` 100 → 62, 420 ms                                                                              |
+| Papel endireita          | transição CSS                                      | `rotate(0)` no foco (sempre) e no hover (só ponteiro fino), 160 ms, `--ease-saida`                   |
+| Pressionar               | transição CSS                                      | `scale(0.97)`, 160 ms; os segmentos (período, status) trocam sem transição, porque mudam pelas setas |
+| Menus e dicas            | transição CSS com `data-starting-style` do Base UI | `scale(0.96)` e opacidade a partir do gatilho (`--transform-origin`), 160 ms; saída em 100 ms        |
+| Diálogos                 | idem                                               | centrados, `scale(0.97)` e opacidade, 200 ms (no celular sobem 24 px, como folha)                    |
+| Menu do celular          | transição CSS com `data-starting-style`            | desce 8 px e opacidade, 200 ms; saída em 120 ms                                                      |
+| Avisos (Sonner)          | transição do Sonner, retemperada                   | 200 ms com `--ease-saida` (o padrão do Sonner é 400 ms `ease`)                                       |
+| Delta do ao vivo         | animação CSS que renasce a cada clique (`key`)     | fundo rosa a 22 % → transparente, 600 ms; o número troca sem animar                                  |
+| Barras das dimensões     | transição CSS                                      | `scaleX`, 200 ms, quando o período muda                                                              |
 
 Princípios:
 

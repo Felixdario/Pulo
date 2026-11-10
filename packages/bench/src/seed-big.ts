@@ -1,6 +1,9 @@
 /**
  * `corepack pnpm seed:big [--clicks=5000000] [--months=12] [--links=2000] [--users=20] [--jobs=4]
- * [--seed=42] [--method=series|copy]`
+ * [--seed=42] [--method=series|copy] [--hot=0]`
+ *
+ * Login: o dono do link mais quente vira `bench@encurta.dev` / `bench1234`. Com `--hot=5000000`, um
+ * link a mais (`pior-caso-5m`, do mesmo dono) leva ~5 M de cliques extras (fase 8, break-ui).
  *
  * Recria do zero **só** o banco `encurtador_bench` (DROP DATABASE … WITH (FORCE) + migrações), gera
  * os cliques brutos no próprio servidor e deriva os agregados da bruta com `rebuild_aggregates`.
@@ -24,6 +27,13 @@ import { copyChunk, seriesInsert, type ClickModel } from './generate';
 import { generateLinks } from './links';
 import { timeModel } from './profile';
 import { REBUILD_AGGREGATES_SQL } from './rebuild';
+
+/** Login do dono do link mais quente (o hash é de `bench1234`, argon2id m=19456 t=2 p=1). */
+const BENCH_LOGIN = {
+  email: 'bench@encurta.dev',
+  password: 'bench1234',
+  hash: '$argon2id$v=19$m=19456,t=2,p=1$xy42pVqv+x2br1USOo1N6A$2fdDMZkLeLTGyNk3g/G7ZQdgDCwBjG+UCWpndnDds4k',
+};
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
@@ -105,6 +115,24 @@ async function seedLinks(sql: Sql, o: SeedOptions, startMs: number, endMs: numbe
     SELECT 'bench-' || i || '@bench.invalid', 'sem-login'
     FROM generate_series(1, ${o.users}::int) AS i`;
   const links = generateLinks({ ...o, startMs, endMs });
+  if (o.hot > 0) {
+    // O link do pior caso: existe antes do início e pesa `hot / clicks` da soma dos outros, então
+    // leva ~hot dos `clicks + hot` cliques gerados (um pouco mais, porque no começo do período há
+    // menos links vivos para dividir).
+    const sum = links.reduce((a, l) => a + l.weight, 0);
+    links.push({
+      userId: 1,
+      slug: 'pior-caso-5m',
+      destination:
+        'https://www.lojaexemplo.com.br/black-friday-2026?utm_source=instagram&utm_medium=bio&utm_campaign=bf26',
+      title: 'Black Friday 2026: o link de milhões de cliques',
+      status: 'active',
+      createdAt: new Date(startMs - 90 * DAY_MS),
+      expiresAt: null,
+      rank: 0,
+      weight: (sum * o.hot) / o.clicks,
+    });
+  }
   const ids: number[] = [];
   for (let i = 0; i < links.length; i += 5000) {
     const part = links.slice(i, i + 5000);
@@ -130,7 +158,9 @@ async function seedLinks(sql: Sql, o: SeedOptions, startMs: number, endMs: numbe
 }
 
 async function main() {
-  const o = parseSeedArgs(process.argv.slice(2));
+  const args = parseSeedArgs(process.argv.slice(2));
+  // Com --hot, o link do pior caso leva os cliques extras: o total gerado é clicks + hot.
+  const o = { ...args, clicks: args.clicks + args.hot };
   const timings: Record<string, number> = {};
   const total0 = performance.now();
   const endMs = Math.floor(Date.now() / HOUR_MS) * HOUR_MS;
@@ -155,7 +185,7 @@ async function main() {
   });
   try {
     const links = await phase(timings, 'usuários, links e partições', async () => {
-      const l = await seedLinks(sql, o, startMs, endMs);
+      const l = await seedLinks(sql, args, startMs, endMs);
       const firstMonth = isoDay(Date.UTC(s.getUTCFullYear(), s.getUTCMonth(), 1));
       const nextMonth = new Date(endMs);
       nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
@@ -300,6 +330,12 @@ async function writeMeta(
     hotUser: Number(hot!.user_id),
     timings,
   };
+  // Login do bench (fase 8): o dono do link mais quente vira `bench@encurta.dev` / `bench1234`,
+  // para abrir o painel contra a API apontada para este banco. O hash argon2id foi gerado uma vez
+  // com o @node-rs/argon2 da API (mesmos parâmetros), para o bench não depender da lib.
+  await sql`
+    UPDATE users SET email = ${BENCH_LOGIN.email}, password_hash = ${BENCH_LOGIN.hash}
+    WHERE id = ${meta.hotUser}`;
   await sql`CREATE TABLE bench.meta (k text PRIMARY KEY, v jsonb NOT NULL)`;
   await sql`INSERT INTO bench.meta VALUES ('seed', ${sql.json(meta as never)})`;
   return meta;

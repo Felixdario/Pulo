@@ -4,7 +4,7 @@ type Listener = (message: string) => void;
 
 /**
  * Uma conexão de SUBSCRIBE por processo, compartilhada por todos os SSE (ADR 0004). O canal
- * `live:<user_id>` é assinado no primeiro ouvinte e desassinado quando o último sai.
+ * `<LIVE_CHANNEL_PREFIX><user_id>` (padrão `live:<user_id>`) é assinado no primeiro ouvinte e desassinado quando o último sai.
  */
 export class LiveHub {
   private readonly listeners = new Map<string, Set<Listener>>();

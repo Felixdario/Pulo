@@ -76,7 +76,7 @@ function AuthForm({ mode }: { mode: Mode }) {
               aria-describedby={emailError ? `${ids.email}-erro` : undefined}
             />
             {emailError && (
-              <p id={`${ids.email}-erro`} className="campo-erro">
+              <p id={`${ids.email}-erro`} className="campo-erro" role="alert">
                 {emailError}
               </p>
             )}
@@ -105,7 +105,7 @@ function AuthForm({ mode }: { mode: Mode }) {
               </p>
             )}
             {passwordError && (
-              <p id={`${ids.senha}-erro`} className="campo-erro">
+              <p id={`${ids.senha}-erro`} className="campo-erro" role="alert">
                 {passwordError}
               </p>
             )}

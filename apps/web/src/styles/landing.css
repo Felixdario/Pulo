@@ -80,6 +80,7 @@
 
 .cartaz-apoio {
   max-width: 34ch;
+  text-wrap: pretty;
   margin-top: 40px;
   font-size: var(--fs-lead);
   line-height: 1.45;
@@ -140,7 +141,7 @@
   transform-origin: 30% 50%;
   /* O papel endireita: o único gesto físico do sistema (DESIGN.md > Motion). */
   transition:
-    transform var(--dur-retorno) ease,
+    transform var(--dur-retorno) var(--ease-saida),
     opacity var(--dur-retorno) var(--ease-saida);
 }
 
@@ -296,6 +297,15 @@
   font-weight: 600;
 }
 
+/* D-08: o slug em mono também na tira (O e 0, l e I não se confundem); o domínio segue em Archivo. */
+.tira-curto-slug {
+  font-family: var(--fonte-mono);
+  font-variation-settings: normal;
+  font-size: 0.86em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 .tira-resultado-pe {
   display: flex;
   gap: var(--esp-4);
@@ -376,6 +386,8 @@
 
 .texto-landing {
   max-width: 62ch;
+  /* Sem palavra sozinha na última linha ("Lite." no FAQ a 390 px). */
+  text-wrap: pretty;
   font-size: var(--fs-texto-landing);
   line-height: 1.55;
   color: var(--suave);

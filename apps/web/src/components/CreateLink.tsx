@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { clsx } from 'clsx';
-import { useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { ApiError } from '../lib/api/problem';
 import type { Link as LinkT, Preview } from '../lib/api/types';
 import { hostOf } from '../lib/format';
@@ -85,6 +85,12 @@ export function CreateLink({ onCreated }: { onCreated?: (link: LinkT) => void })
   const [destError, setDestError] = useState<string | null>(null);
   const [created, setCreated] = useState<LinkT | null>(null);
   const destRef = useRef<HTMLInputElement>(null);
+  const createdRef = useRef<HTMLDivElement>(null);
+  // O botão Encurtar fica desabilitado durante o envio e perde o foco; o foco vai para o Copiar do
+  // resultado (como na landing), e o teclado continua dali.
+  useEffect(() => {
+    if (created) createdRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+  }, [created]);
   const aliasCheck = checkAlias(alias);
 
   async function submit(e: FormEvent) {
@@ -173,7 +179,7 @@ export function CreateLink({ onCreated }: { onCreated?: (link: LinkT) => void })
             aria-describedby={destMessage ? `${ids.destino}-erro` : undefined}
           />
           {destMessage && (
-            <p id={`${ids.destino}-erro`} className="campo-erro">
+            <p id={`${ids.destino}-erro`} className="campo-erro" role="alert">
               {destMessage}
             </p>
           )}
@@ -234,7 +240,7 @@ export function CreateLink({ onCreated }: { onCreated?: (link: LinkT) => void })
         </p>
       )}
       {created && (
-        <div className="criado" role="status">
+        <div className="criado" role="status" ref={createdRef}>
           <div className="criado-link">
             <p className="rotulo suave">Pronto. Seu link curto:</p>
             <ShortLink url={created.short_url} className="criado-curto" />

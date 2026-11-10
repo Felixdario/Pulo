@@ -145,6 +145,9 @@ describe('ponta a ponta: stream → worker real → encurtador_bench', () => {
       config: {
         ...loadConfig({}),
         stream,
+        // Canal do ao vivo só deste teste: com o `live:` padrão, uma aba do dev aberta no usuário de
+        // mesmo id receberia os cliques sintéticos (o Pub/Sub do Redis ignora o db).
+        liveChannelPrefix: `bench-consistency-${process.pid}:`,
         consumer: 'consistency',
         blockMs: 100,
         flushIntervalMs: 100,

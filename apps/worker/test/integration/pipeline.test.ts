@@ -1,5 +1,7 @@
 import { uuidv7 } from '@encurtador/shared';
+import { Redis } from 'ioredis';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { loadConfig } from '../../src/config';
 import { COUNTRIES, metricValue, setup, UA, visitorId, type EventInput } from './helpers';
 
 const t = setup();
@@ -413,6 +415,109 @@ describe('schema e partições', () => {
     const [p] = await sql`SELECT tableoid::regclass::text AS part FROM clicks`;
     expect(p!.part).toBe('clicks_default');
     expectConsistent(await totals());
+  });
+
+  it('retenção: drop_old_click_partitions(12) apaga a bruta antiga e mantém os agregados', async () => {
+    const now = new Date();
+    const month = (back: number) =>
+      new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - back, 1));
+    const name = (d: Date) =>
+      `clicks_p${d.getUTCFullYear()}_${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    // Corte com 12 meses = 1º dia de (mês corrente − 12). O mês −13 termina no corte: sai.
+    // O mês −12 termina depois do corte: fica. O −14 e o −13 têm partição própria.
+    const [old, edge, kept] = [month(14), month(13), month(12)];
+    const existed = new Set<string>();
+    for (const d of [old, edge, kept]) {
+      const [r] = await sql`SELECT to_regclass(${name(d)}) AS t`;
+      if (r!.t) existed.add(name(d));
+    }
+    try {
+      await sql`SELECT ensure_click_partitions(${old.toISOString().slice(0, 10)}::date, ${kept
+        .toISOString()
+        .slice(0, 10)}::date)`;
+      const stream = t.newStream();
+      const off = t.worker(stream);
+      await off.start();
+      const [link] = await t.links(1);
+      const mid = (d: Date) => d.getTime() + 10 * 86_400_000;
+      await t.publish(stream, [
+        { link_id: link!, ts: mid(old) },
+        { link_id: link!, ts: mid(edge) },
+        { link_id: link!, ts: mid(kept) },
+        // Na DEFAULT (meses sem partição própria): um antes do corte (sai) e um depois (fica).
+        { link_id: link!, ts: mid(month(16)) },
+        { link_id: link!, ts: mid(month(11)) },
+      ]);
+      await t.drained(stream);
+      const before = await totals();
+      expect(before.raw.total).toBe(5);
+
+      // Desligada por padrão: CLICK_RETENTION_MONTHS vazio não apaga nada.
+      expect(loadConfig({}).clickRetentionMonths).toBeNull();
+      expect(loadConfig({ CLICK_RETENTION_MONTHS: ' ' }).clickRetentionMonths).toBeNull();
+      expect(loadConfig({ CLICK_RETENTION_MONTHS: '12' }).clickRetentionMonths).toBe(12);
+      expect(() => loadConfig({ CLICK_RETENTION_MONTHS: '0' })).toThrow(/inteiro inválido/);
+      expect(await off.retention()).toBe(0);
+      expect((await totals()).raw.total).toBe(5);
+      await off.stop();
+
+      const on = t.worker(stream, { clickRetentionMonths: 12 });
+      expect(await on.retention()).toBe(2);
+      for (const d of [old, edge]) {
+        const [r] = await sql`SELECT to_regclass(${name(d)}) AS t`;
+        expect(r!.t, name(d)).toBeNull();
+      }
+      const [k] = await sql`SELECT to_regclass(${name(kept)}) AS t`;
+      expect(k!.t).not.toBeNull();
+      const rows = await sql<{ ms: string }[]>`
+        SELECT (extract(epoch FROM occurred_at) * 1000)::bigint AS ms FROM clicks ORDER BY 1`;
+      expect(rows.map((r) => Number(r.ms))).toEqual([mid(kept), mid(month(11))]);
+      // Os agregados (fonte do painel, ADR 0006) não mudam.
+      const after = await totals();
+      expect(after.daily).toEqual(before.daily);
+      expect(after.hourly).toEqual(before.hourly);
+      expect(after.clickCount).toBe(5);
+      // Idempotente; e 0 meses é recusado.
+      expect(await on.retention()).toBe(0);
+      await expect(sql`SELECT drop_old_click_partitions(0)`).rejects.toThrow(/keep_months/);
+    } finally {
+      for (const d of [old, edge, kept]) {
+        if (!existed.has(name(d))) await sql.unsafe(`DROP TABLE IF EXISTS "${name(d)}"`);
+      }
+    }
+  });
+});
+
+describe('ao vivo', () => {
+  it('publica o lote em <LIVE_CHANNEL_PREFIX><user_id>', async () => {
+    const prefix = `test-live-${process.pid}-${Date.now()}:`;
+    const [user] = await sql<{ id: string }[]>`
+      INSERT INTO users (email, password_hash) VALUES (${`live-${Date.now()}@teste.dev`}, 'x')
+      RETURNING id`;
+    const userId = Number(user!.id);
+    const [link] = await t.links(1, userId);
+    const sub = new Redis(t.redisUrl);
+    const got: { channel: string; message: string }[] = [];
+    sub.on('message', (channel: string, message: string) => got.push({ channel, message }));
+    try {
+      await sub.subscribe(`${prefix}${userId}`, `live:${userId}`);
+      const stream = t.newStream();
+      const w = t.worker(stream, { liveChannelPrefix: prefix });
+      await w.start();
+      await t.publish(stream, [{ link_id: link! }, { link_id: link!, ua: UA.googlebot }]);
+      await t.drained(stream);
+      await expect.poll(() => got.length, { timeout: 3000 }).toBeGreaterThan(0);
+      expect(got.every((g) => g.channel === `${prefix}${userId}`)).toBe(true);
+      const sum = got
+        .map((g) => JSON.parse(g.message) as { link_id: number; humans: number; total: number })
+        .reduce((a, m) => ({ humans: a.humans + m.humans, total: a.total + m.total }), {
+          humans: 0,
+          total: 0,
+        });
+      expect(sum).toEqual({ humans: 1, total: 2 });
+    } finally {
+      sub.disconnect();
+    }
   });
 });
 

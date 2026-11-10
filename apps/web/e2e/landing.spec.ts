@@ -7,6 +7,8 @@ test('landing encurta sem login e o redirect leva ao destino', async ({ page, re
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     /Encurte links\.\s*Conte só gente\./i,
   );
+  // O painel "Demo data / Worst case" do break-ui é só do `vite` em dev: o build não o carrega.
+  await expect(page.locator('[data-dev-pior-caso]')).toHaveCount(0);
 
   // Erro claro antes de ir à rede.
   await page.getByLabel('Link para encurtar').fill('isso não é um link');

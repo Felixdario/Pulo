@@ -1,4 +1,4 @@
-import { ensureTestDatabase } from '@encurtador/db/testing';
+import { ensureTestDatabase, holdTestSuiteLock } from '@encurtador/db/testing';
 import type { TestProject } from 'vitest/node';
 
 declare module 'vitest' {
@@ -8,5 +8,8 @@ declare module 'vitest' {
 }
 
 export default async function setup(project: TestProject) {
+  // Uma suíte de integração por vez no servidor inteiro (ver holdTestSuiteLock).
+  const release = await holdTestSuiteLock();
   project.provide('testDatabaseUrl', await ensureTestDatabase());
+  return release;
 }

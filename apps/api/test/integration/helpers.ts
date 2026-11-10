@@ -9,6 +9,8 @@ import { loadConfig, type ApiConfig } from '../../src/config';
 export const SECRET = 'segredo-de-teste-com-pelo-menos-32-caracteres';
 export const WEB_ORIGIN = 'http://localhost:5173';
 export const DEST = 'https://example.com/destino';
+/** Prefixo do canal do ao vivo nos testes (LIVE_CHANNEL_PREFIX), único por processo. */
+export const LIVE_PREFIX = `test-live-${process.pid}-${Date.now()}:`;
 
 export function setup() {
   const { db, close } = createDb(inject('testDatabaseUrl'), { max: 20 });
@@ -27,6 +29,9 @@ export function setup() {
       // Balde enorme por padrão: só os testes de rate limit usam os valores do ADR.
       bucket: { capacity: 1_000_000, refillPerSecond: 1_000_000 },
       authBucket: { capacity: 1_000_000, refillPerSecond: 1_000_000 },
+      // O Pub/Sub do Redis é global (ignora o db): com o prefixo do dev, uma aba aberta em
+      // `live:1` entrava no PUBSUB NUMSUB do teste. Um prefixo por processo isola os dois.
+      liveChannelPrefix: LIVE_PREFIX,
       ...overrides,
     };
   }

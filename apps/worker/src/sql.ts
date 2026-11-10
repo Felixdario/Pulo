@@ -200,3 +200,14 @@ export async function ensurePartitions(sql: Sql, now = new Date()): Promise<numb
       .slice(0, 10)}::date) AS n`;
   return row?.n ?? 0;
 }
+
+/**
+ * Retenção da bruta: `drop_old_click_partitions(meses)` (migração 0004) derruba as partições
+ * mensais de `clicks` mais antigas que N meses completos. Cada chamada do postgres.js é um comando
+ * em autocommit, então a função roda numa transação curta só dela (DETACH sem CONCURRENTLY, porque
+ * a `clicks` tem DEFAULT; ver o comentário da migração).
+ */
+export async function dropOldClickPartitions(sql: Sql, months: number): Promise<number> {
+  const [row] = await sql<{ n: number }[]>`SELECT drop_old_click_partitions(${months}::int) AS n`;
+  return row?.n ?? 0;
+}

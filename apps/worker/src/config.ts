@@ -24,6 +24,13 @@ export interface WorkerConfig {
   /** statement_timeout da conexão do worker. */
   statementTimeoutMs: number;
   metricsPort: number;
+  /** Prefixo do canal Pub/Sub do ao vivo (`<prefixo><user_id>`), o mesmo da API. */
+  liveChannelPrefix: string;
+  /**
+   * Retenção da bruta `clicks` em meses completos (`CLICK_RETENTION_MONTHS`). Vazio = nunca apaga
+   * (padrão). Com N, a cada 12 h o worker chama `drop_old_click_partitions(N)` (migração 0004).
+   */
+  clickRetentionMonths: number | null;
 }
 
 const int = (v: string | undefined, fallback: number): number => {
@@ -47,5 +54,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): WorkerConfig {
     stopTimeoutMs: int(env.WORKER_STOP_TIMEOUT_MS, 20_000),
     statementTimeoutMs: int(env.WORKER_STATEMENT_TIMEOUT_MS, 30_000),
     metricsPort: int(env.WORKER_METRICS_PORT, 9464),
+    liveChannelPrefix: env.LIVE_CHANNEL_PREFIX?.trim() || 'live:',
+    clickRetentionMonths:
+      env.CLICK_RETENTION_MONTHS === undefined || env.CLICK_RETENTION_MONTHS.trim() === ''
+        ? null
+        : int(env.CLICK_RETENTION_MONTHS, 0),
   };
 }

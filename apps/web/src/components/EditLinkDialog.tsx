@@ -236,7 +236,7 @@ export function EditLinkDialog({
                   aria-describedby={fieldError('destination') ? `${ids.destino}-e` : undefined}
                 />
                 {fieldError('destination') && (
-                  <p id={`${ids.destino}-e`} className="campo-erro">
+                  <p id={`${ids.destino}-e`} className="campo-erro" role="alert">
                     {fieldError('destination')}
                   </p>
                 )}
@@ -267,7 +267,7 @@ export function EditLinkDialog({
                   aria-describedby={fieldError('expires_at') ? `${ids.expira}-e` : undefined}
                 />
                 {fieldError('expires_at') && (
-                  <p id={`${ids.expira}-e`} className="campo-erro">
+                  <p id={`${ids.expira}-e`} className="campo-erro" role="alert">
                     {fieldError('expires_at')}
                   </p>
                 )}

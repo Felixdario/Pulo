@@ -31,6 +31,11 @@ export interface ApiConfig {
   publicLinkTtlDays: number;
   liveHeartbeatMs: number;
   liveTicketTtlSeconds: number;
+  /**
+   * Prefixo do canal Pub/Sub do ao vivo (`<prefixo><user_id>`), o mesmo do worker. O Pub/Sub do
+   * Redis ignora o db: os testes usam um prefixo único para não ouvir (nem contar) o dev.
+   */
+  liveChannelPrefix: string;
   preview: {
     timeoutMs: number;
     maxBytes: number;
@@ -88,6 +93,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     publicLinkTtlDays: 30,
     liveHeartbeatMs: 15_000,
     liveTicketTtlSeconds: 30,
+    liveChannelPrefix: env.LIVE_CHANNEL_PREFIX?.trim() || 'live:',
     preview: { timeoutMs: 3000, maxBytes: 512 * 1024, maxRedirects: 3, cacheTtlSeconds: 3600 },
   };
 }
