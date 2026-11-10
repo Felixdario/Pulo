@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "bench:redirect": "tsx scripts/bench-redirect.ts",
-    "geo:download": "tsx scripts/geo-download.ts"
+    "geo:download": "tsx scripts/geo-download.ts",
+    "seed:demo": "corepack pnpm --filter @encurtador/api seed:demo"
   },
   "devDependencies": {
     "@encurtador/db": "workspace:*",

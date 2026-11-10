@@ -61,7 +61,7 @@ export async function resetTestDb(db: Database): Promise<void> {
     throw new Error(`recusando TRUNCATE fora de ${TEST_DATABASE_NAME}: ${String(row?.db)}`);
   }
   await db.execute(
-    sql`TRUNCATE links, users, clicks, click_visitors, clicks_hourly, clicks_daily, clicks_daily_dim, clicks_daily_preview RESTART IDENTITY CASCADE`,
+    sql`TRUNCATE idempotency_keys, api_keys, refresh_tokens, links, users, clicks, click_visitors, clicks_hourly, clicks_daily, clicks_daily_dim, clicks_daily_preview RESTART IDENTITY CASCADE`,
   );
 }
 

@@ -67,3 +67,9 @@ jobs:
 
       # Fase 3: pipeline de cliques (worker, inclusive 4 workers × 100.000 eventos e fim a fim).
       - run: pnpm --filter @encurtador/worker test:integration
+
+      # Fase 4: API /v1 por rota (auth, chaves, links, stats, SSE, prévia, público, OpenAPI, seed).
+      - run: pnpm --filter @encurtador/api test:integration
+
+      # Seed demo duas vezes no banco do service: idempotente.
+      - run: pnpm seed:demo && pnpm seed:demo
