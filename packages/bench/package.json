@@ -1,0 +1,33 @@
+{
+  "name": "@encurtador/bench",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "seed:big": "tsx --env-file-if-exists=../../.env src/seed-big.ts",
+    "bench:analytics": "tsx --env-file-if-exists=../../.env src/bench/analytics.ts",
+    "bench:write": "tsx --env-file-if-exists=../../.env src/bench/write.ts",
+    "bench:trgm": "tsx --env-file-if-exists=../../.env src/bench/trgm.ts",
+    "bench:retention": "tsx --env-file-if-exists=../../.env src/bench/retention.ts",
+    "test:consistency": "vitest run --config vitest.consistency.config.ts"
+  },
+  "dependencies": {
+    "@encurtador/db": "workspace:*",
+    "@encurtador/geo": "workspace:*",
+    "@encurtador/shared": "workspace:*",
+    "@encurtador/worker": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "ioredis": "^6.0.0",
+    "pino": "^10.0.0",
+    "postgres": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

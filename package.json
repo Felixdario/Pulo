@@ -15,7 +15,13 @@
     "format:check": "prettier --check .",
     "bench:redirect": "tsx scripts/bench-redirect.ts",
     "geo:download": "tsx scripts/geo-download.ts",
-    "seed:demo": "corepack pnpm --filter @encurtador/api seed:demo"
+    "seed:demo": "corepack pnpm --filter @encurtador/api seed:demo",
+    "seed:big": "corepack pnpm --filter @encurtador/bench seed:big",
+    "test:consistency": "corepack pnpm --filter @encurtador/bench test:consistency",
+    "bench:analytics": "corepack pnpm --filter @encurtador/bench bench:analytics",
+    "bench:write": "corepack pnpm --filter @encurtador/bench bench:write",
+    "bench:trgm": "corepack pnpm --filter @encurtador/bench bench:trgm",
+    "bench:retention": "corepack pnpm --filter @encurtador/bench bench:retention"
   },
   "devDependencies": {
     "@encurtador/db": "workspace:*",

@@ -11,3 +11,6 @@ coverage
 
 # Bases do DB-IP baixadas por pnpm geo:download
 data/geo/
+
+# Resultados brutos do bench da fase 5 (corepack pnpm bench:*)
+packages/bench/results/

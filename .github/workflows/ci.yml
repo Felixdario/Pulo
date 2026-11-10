@@ -71,5 +71,11 @@ jobs:
       # Fase 4: API /v1 por rota (auth, chaves, links, stats, SSE, prévia, público, OpenAPI, seed).
       - run: pnpm --filter @encurtador/api test:integration
 
+      # Fase 5: seed grande em tamanho de CI (50 mil cliques, banco encurtador_bench) e consistência
+      # agregado × bruta, inclusive ponta a ponta com o worker real.
+      - run: pnpm seed:big --clicks=50000
+
+      - run: pnpm test:consistency
+
       # Seed demo duas vezes no banco do service: idempotente.
       - run: pnpm seed:demo && pnpm seed:demo

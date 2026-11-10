@@ -16,7 +16,7 @@ export const TEST_DATABASE_NAME = 'encurtador_test';
 export const TEST_REDIS_DB = 1;
 export const MIGRATIONS_FOLDER = fileURLToPath(new URL('../drizzle', import.meta.url));
 
-function loadRootEnv(): void {
+export function loadRootEnv(): void {
   const envFile = fileURLToPath(new URL('../../../.env', import.meta.url));
   if (existsSync(envFile)) process.loadEnvFile(envFile);
 }
@@ -45,13 +45,49 @@ export async function ensureTestDatabase(): Promise<string> {
   } finally {
     await admin.end({ timeout: 5 });
   }
-  const conn = postgres(testUrl, { max: 1, onnotice: () => {} });
+  await migrateDatabase(testUrl);
+  return testUrl;
+}
+
+/** Aplica as migrações de `packages/db/drizzle` no banco da URL. */
+export async function migrateDatabase(url: string): Promise<void> {
+  const conn = postgres(url, { max: 1, onnotice: () => {} });
   try {
     await migrate(drizzle(conn), { migrationsFolder: MIGRATIONS_FOLDER });
   } finally {
     await conn.end({ timeout: 5 });
   }
-  return testUrl;
+}
+
+/**
+ * Banco do seed grande e das medições da fase 5 (`packages/bench`). Fica no mesmo servidor, mas
+ * separado do dev e do teste: pode ser apagado e recriado a qualquer momento.
+ */
+export const BENCH_DATABASE_NAME = 'encurtador_bench';
+
+export function resolveBenchUrls(): { adminUrl: string; benchUrl: string } {
+  if (!process.env.DATABASE_URL) loadRootEnv();
+  const base = process.env.DATABASE_URL;
+  if (!base) throw new Error('DATABASE_URL não definida (copie .env.example para .env)');
+  const bench = new URL(process.env.BENCH_DATABASE_URL ?? base);
+  bench.pathname = `/${BENCH_DATABASE_NAME}`;
+  const admin = new URL(base);
+  admin.pathname = '/postgres';
+  return { adminUrl: admin.href, benchUrl: bench.href };
+}
+
+/** Apaga (se existir) e recria `encurtador_bench`, já migrado. O nome é fixo: nunca outro banco. */
+export async function recreateBenchDatabase(): Promise<string> {
+  const { adminUrl, benchUrl } = resolveBenchUrls();
+  const admin = postgres(adminUrl, { max: 1, onnotice: () => {} });
+  try {
+    await admin.unsafe(`DROP DATABASE IF EXISTS "${BENCH_DATABASE_NAME}" WITH (FORCE)`);
+    await admin.unsafe(`CREATE DATABASE "${BENCH_DATABASE_NAME}"`);
+  } finally {
+    await admin.end({ timeout: 5 });
+  }
+  await migrateDatabase(benchUrl);
+  return benchUrl;
 }
 
 /** TRUNCATE só depois de confirmar, no próprio servidor, que estamos no banco de teste. */

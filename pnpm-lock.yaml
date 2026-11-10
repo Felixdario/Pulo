@@ -223,6 +223,46 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.7(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
+  packages/bench:
+    dependencies:
+      '@encurtador/db':
+        specifier: workspace:*
+        version: link:../db
+      '@encurtador/geo':
+        specifier: workspace:*
+        version: link:../geo
+      '@encurtador/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@encurtador/worker':
+        specifier: workspace:*
+        version: link:../../apps/worker
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(@opentelemetry/api@1.10.0)(postgres@4.1.0)
+      ioredis:
+        specifier: ^6.0.0
+        version: 6.0.0
+      pino:
+        specifier: ^10.0.0
+        version: 10.4.0
+      postgres:
+        specifier: ^4.1.0
+        version: 4.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^5.1.0
+        version: 5.1.0(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(vite@8.3.7(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+
   packages/db:
     dependencies:
       '@encurtador/shared':

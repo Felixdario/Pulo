@@ -3,6 +3,13 @@ name: encurtador
 services:
   postgres:
     image: postgres:16-alpine
+    # Fase 5 (docs/performance.md): o volume é SSD, então random_page_cost=1.1 em vez do padrão 4
+    # (feito para disco giratório). Com 4, a visão da conta lia o clicks_daily inteiro (29 ms); com
+    # 1.1 vira nested loop pelo índice da PK (4 ms). O resto da configuração fica no padrão.
+    command: ['postgres', '-c', 'random_page_cost=1.1']
+    # O /dev/shm padrão do Docker (64 MB) derruba VACUUM e índices paralelos em tabelas grandes
+    # ("could not resize shared memory segment … No space left on device").
+    shm_size: 256mb
     environment:
       POSTGRES_DB: encurtador
       POSTGRES_USER: encurtador
