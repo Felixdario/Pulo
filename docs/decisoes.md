@@ -36,3 +36,14 @@ Os arquivos ficam em `data/geo/`, fora do git. Consultando com o IP truncado, co
 
 A precisão de cidade da base Lite vem por bairro ou município, que é suficiente para o mapa e a tabela
 de cidades. Sem os arquivos, país e cidade continuam `null`.
+
+## D-06 — Nome e direção de design (2026-11-10)
+- **Nome:** o produto se chama **Pulo**, escolhido entre Pulo, Rastro e Curto. Ele nomeia o mecanismo
+  (o salto do redirect), tem 4 letras e funciona em pt-BR e em inglês.
+- **Domínio:** é só hipótese (`pulo.to`). Nada foi pesquisado nem registrado.
+- **Direção:**
+  - a landing é um cartaz lambe-lambe de gráfica popular, rosa e preto em Archivo condensada;
+  - o app segue um estilo acromático de livro-razão, e o rosa aparece só nos cliques humanos.
+- **Sem entrevista com o usuário:** a fase rodou sem ela. O que foi inferido está marcado em
+  `PRODUCT.md`. A mudança de nome ou de direção é barata até a fase 7.
+- **Rascunhos do impeccable:** ficam fora do git (`mocks/`, `questions/`, `review/`), como no Pontual.

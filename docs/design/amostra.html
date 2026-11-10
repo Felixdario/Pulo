@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pulo, amostra do sistema</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../apps/web/src/styles/tokens.css" />
+    <style>
+      * { box-sizing: border-box; }
+      html { background: var(--papel); color: var(--tinta); }
+      body { margin: 0; font-family: var(--fonte); font-size: var(--fs-corpo); line-height: 20px; font-variation-settings: 'wdth' 100; }
+      ::selection { background: var(--rosa-grafica); color: #141414; }
+      :focus-visible { outline: var(--foco); outline-offset: var(--foco-recuo); }
+      .num { font-variant-numeric: tabular-nums; }
+      .mono { font-family: var(--fonte-mono); font-weight: 500; }
+      .muted { color: var(--suave); }
+      .faint { color: var(--apagada); }
+      main { max-width: 1280px; margin: 0 auto; padding: 0 var(--margem-landing) 96px; }
+      h2 { font-size: var(--fs-secao); font-weight: 600; margin: 64px 0 16px; line-height: 24px; }
+      h3 { font-size: var(--fs-corpo); font-weight: 600; margin: 24px 0 8px; }
+      p { margin: 0 0 8px; max-width: 70ch; }
+
+      /* Cartaz */
+      .cartaz { background: var(--rosa-grafica); color: #141414; padding: 24px var(--margem-landing) 72px; }
+      .cartaz nav { display: flex; justify-content: space-between; align-items: center; max-width: 1280px; margin: 0 auto 56px; }
+      .cartaz nav a { color: #141414; text-decoration: underline; text-underline-offset: 3px; margin-left: 20px; font-size: 15px; }
+      .wordmark { font-weight: 850; font-variation-settings: 'wdth' 62; font-size: 28px; letter-spacing: -0.02em; line-height: 1; }
+      .wordmark .ponto { color: var(--rosa-dado); }
+      .cartaz .wordmark .ponto { color: #141414; }
+      .frase { max-width: 1280px; margin: 0 auto; position: relative; }
+      .frase h1 { font-size: var(--fs-cartaz); font-weight: 850; font-variation-settings: 'wdth' 62; line-height: 0.9; letter-spacing: -0.02em; text-transform: uppercase; margin: 0; }
+      .tira { display: flex; align-items: center; gap: 12px; background: #fff; color: #141414; height: var(--altura-tira); width: min(640px, 100%); padding: 0 8px 0 20px; transform: rotate(var(--inclinacao-tira)); margin: -0.35em 0 0 6vw; position: relative; transition: transform var(--dur-retorno) var(--ease-saida); }
+      .tira:hover, .tira:focus-within { transform: rotate(0deg); }
+      .tira label { display: flex; flex-direction: column; flex: 1; font-size: 12px; font-weight: 500; }
+      .tira input { border: 0; font: inherit; font-size: 17px; font-weight: 400; padding: 4px 0; background: transparent; color: #141414; min-width: 0; }
+      .tira input::placeholder { color: #6b6b64; }
+      .btn-cartaz { background: #141414; color: #fff; border: 0; height: 56px; padding: 0 28px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; }
+      .apoio { font-size: var(--fs-lead); line-height: 1.45; margin-top: 40px; max-width: 48ch; }
+      @media (prefers-reduced-motion: reduce) { .tira { transform: none; transition: none; } }
+      @media (max-width: 640px) {
+        .tira { transform: none; margin: 24px 0 0; flex-wrap: wrap; height: auto; padding: 12px; }
+        .btn-cartaz { width: 100%; }
+        .cartaz nav a:not(:last-child) { display: none; }
+      }
+
+      /* Amostras de cor */
+      .grade-cores { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+      .cor { background: var(--folha); border: 1px solid var(--borda); border-radius: var(--raio-folha); overflow: hidden; }
+      .cor .chapa { height: 56px; display: flex; align-items: flex-end; padding: 8px; font-weight: 600; }
+      .cor .info { padding: 8px 12px 12px; font-size: 12px; line-height: 16px; }
+      .rampa { display: flex; gap: 2px; }
+      .rampa span { flex: 1; height: 32px; }
+      .tabela-c { width: 100%; border-collapse: collapse; background: var(--folha); border: 1px solid var(--borda); border-radius: var(--raio-folha); }
+      .tabela-c th, .tabela-c td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--fio); font-size: 13px; }
+      .tabela-c th { color: var(--suave); font-weight: 500; font-size: 12px; }
+      .tabela-c td.num, .tabela-c th.num { text-align: right; }
+      .ok { color: var(--positivo); font-weight: 600; }
+      .falha { color: var(--negativo); font-weight: 600; }
+
+      /* App */
+      .folha { background: var(--folha); border: 1px solid var(--borda); border-radius: var(--raio-folha); padding: 20px; }
+      .linha { display: grid; grid-template-columns: 2fr 2fr 2.4fr 1fr 0.8fr auto; gap: 16px; align-items: center; min-height: var(--altura-linha); border-bottom: 1px solid var(--fio); padding: 0 4px; }
+      .linha.cab { min-height: 36px; color: var(--suave); font-size: 12px; font-weight: 500; }
+      .linha:not(.cab):hover { background: var(--elevado); }
+      .direita { text-align: right; }
+      .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+      .chip { display: inline-flex; align-items: center; gap: 4px; height: var(--altura-chip); padding: 0 8px; background: var(--elevado); color: var(--tinta); border-radius: var(--raio-chip); font-size: 12px; font-weight: 500; white-space: nowrap; }
+      .chip.vencido { background: var(--negativo-fundo); color: var(--negativo-tinta); }
+      .chip.perto { background: var(--aviso-fundo); color: var(--aviso-tinta); }
+      .btn { height: var(--altura-controle); padding: 0 14px; border-radius: var(--raio-controle); border: 0; font: inherit; font-weight: 600; cursor: pointer; }
+      .btn.primario { background: var(--tinta); color: var(--on-tinta); }
+      .btn.secundario { background: var(--elevado); color: var(--tinta); }
+      .titulo-link { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+      .titulo-link .slug { font-family: var(--fonte-mono); font-size: 24px; line-height: 30px; font-weight: 500; }
+      .ao-vivo { text-align: right; }
+      .ao-vivo .rot { font-size: 12px; font-weight: 500; display: inline-flex; gap: 6px; align-items: center; }
+      .ao-vivo .ponto { width: 8px; height: 8px; background: var(--rosa-dado); display: inline-block; border-radius: 50%; }
+      .ao-vivo .n { font-size: var(--fs-numero); line-height: 36px; font-weight: 650; font-variation-settings: 'wdth' 75; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+      .ao-vivo .delta { font-size: 12px; color: var(--rosa-texto); font-weight: 500; }
+      .faixa { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--borda); border-radius: var(--raio-folha); background: var(--folha); margin-top: 16px; }
+      .faixa > div { padding: 16px 20px; border-left: 1px solid var(--borda); }
+      .faixa > div:first-child { border-left: 0; }
+      .faixa .r { font-size: 12px; color: var(--suave); font-weight: 500; }
+      .faixa .v { font-size: 24px; line-height: 30px; font-weight: 600; font-variation-settings: 'wdth' 75; font-variant-numeric: tabular-nums; }
+      .faixa .v.lider { font-size: 32px; line-height: 36px; font-weight: 650; }
+      .regua { display: flex; gap: 2px; height: 12px; margin: 20px 0 8px; }
+      .regua .h { background: var(--rosa-dado); }
+      .regua .b { background: repeating-linear-gradient(135deg, var(--apagada) 0 1px, var(--elevado) 1px 4px); } /* taste-skill-ignore: hachura dos bots, padrão e não gradiente */
+      .regua .p { background: radial-gradient(var(--apagada) 1px, var(--elevado) 1.2px) 0 0 / 4px 4px; } /* taste-skill-ignore: pontilhado das prévias */
+      .skel { background: var(--elevado); display: inline-block; border-radius: 2px; }
+      .vazio { border: 1px dashed var(--controle); border-radius: var(--raio-folha); padding: 12px 16px; color: var(--suave); }
+      @media (max-width: 640px) {
+        .linha { grid-template-columns: 1fr auto; }
+        .linha > :nth-child(n + 2):not(:last-child) { display: none; }
+        .faixa { grid-template-columns: 1fr 1fr; }
+        .faixa > div:nth-child(3) { border-left: 0; }
+        .faixa > div:nth-child(n + 3) { border-top: 1px solid var(--borda); }
+      }
+
+      .barra-tema { position: fixed; right: 16px; bottom: 16px; display: flex; gap: 4px; background: var(--folha); border: 1px solid var(--borda); border-radius: var(--raio-controle); padding: 4px; box-shadow: var(--sombra-flutuante); }
+      .barra-tema button[aria-pressed='true'] { background: var(--tinta); color: var(--on-tinta); }
+    </style>
+  </head>
+  <body>
+    <header class="cartaz sobre-rosa">
+      <nav aria-label="Principal">
+        <span class="wordmark">pulo<span class="ponto">.</span></span>
+        <span><a href="#cores">Cores</a><a href="#tipo">Tipo</a><a href="#componentes">Componentes</a><a href="#estados">Estados</a></span>
+      </nav>
+      <div class="frase">
+        <h1>Encurte links.<br />Conte só gente.</h1>
+        <form class="tira" onsubmit="return false">
+          <label>Link para encurtar
+            <input type="url" placeholder="https://sualoja.com.br/black-friday?utm_source=instagram" />
+          </label>
+          <button class="btn-cartaz" type="submit">Encurtar</button>
+        </form>
+        <p class="apoio">O Pulo encurta na hora e conta cada clique de gente uma vez. Robôs e prévias do WhatsApp ficam à parte.</p>
+      </div>
+    </header>
+
+    <main>
+      <p style="margin-top: 24px" class="muted">
+        Amostra estática da fase 6 para conferir paleta, contraste e tipo. Os dados são de demonstração. Os
+        contrastes abaixo são calculados no navegador a partir dos tokens carregados.
+      </p>
+
+      <h2 id="cores">Cores e contraste</h2>
+      <div class="grade-cores" id="grade-cores"></div>
+
+      <h3>Pares de texto e de marca, no tema atual</h3>
+      <div style="overflow-x: auto"><table class="tabela-c">
+        <thead><tr><th>Frente</th><th>Fundo</th><th>Uso</th><th class="num">Contraste</th><th class="num">Exige</th><th>AA</th></tr></thead>
+        <tbody id="pares"></tbody>
+      </table></div>
+
+      <h3>Paleta categórica</h3>
+      <div class="rampa" aria-label="Paleta categórica">
+        <span style="background: var(--cat-1)"></span><span style="background: var(--cat-2)"></span><span style="background: var(--cat-3)"></span><span style="background: var(--cat-4)"></span><span style="background: var(--cat-5)"></span>
+      </div>
+      <h3>Paleta sequencial do mapa (vazio e cinco classes)</h3>
+      <div class="rampa" aria-label="Paleta sequencial">
+        <span style="background: var(--seq-vazio)"></span><span style="background: var(--seq-1)"></span><span style="background: var(--seq-2)"></span><span style="background: var(--seq-3)"></span><span style="background: var(--seq-4)"></span><span style="background: var(--seq-5)"></span>
+      </div>
+
+      <h2 id="tipo">Tipo</h2>
+      <p style="font-size: var(--fs-declaracao); font-weight: 700; font-variation-settings: 'wdth' 75; line-height: 1.1; letter-spacing: -0.01em">Regras que se explicam</p>
+      <p style="font-size: var(--fs-texto-landing); line-height: 1.55">Cada link decide para onde vai: do Brasil para /br, do iPhone para a App Store, e para de abrir depois de 500 cliques de gente.</p>
+      <p style="font-size: 24px; font-weight: 700; line-height: 30px">Links</p>
+      <p>Corpo de 14 px para célula, navegação e formulário. <span class="faint">Meta de 12 px em apagada.</span></p>
+      <p><span class="mono">pulo.to/aB3xK9q</span> · <span class="mono">Il1O0</span> na mono, contra <span>Il1O0</span> na Archivo.</p>
+      <p id="tnum" class="muted">Medindo algarismos tabulares…</p>
+
+      <h2 id="componentes">Componentes</h2>
+      <div class="folha">
+        <div class="titulo-link">
+          <div>
+            <div class="slug"><span class="muted">pulo.to/</span>demo-promo</div>
+            <div class="muted" style="margin-top: 4px">lojadamara.com.br/black-friday · Black Friday 2026</div>
+            <div style="margin-top: 12px; display: flex; gap: 8px"><button class="btn primario">Copiar</button><button class="btn secundario">QR</button><button class="btn secundario">Editar</button></div>
+          </div>
+          <div class="ao-vivo" aria-live="polite">
+            <div class="rot"><span class="ponto" aria-hidden="true"></span>Ao vivo</div>
+            <div class="n">1.284</div>
+            <div class="delta">+3 no último minuto</div>
+          </div>
+        </div>
+        <div class="chips" style="margin-top: 16px">
+          <span class="chip">Expira 12/12 23:59</span><span class="chip">iPhone → App Store</span><span class="chip">BR, PT → /pt</span><span class="chip perto">Faltam 12 de 500</span><span class="chip vencido">Expirou 31/10</span>
+        </div>
+        <div class="faixa">
+          <div><div class="r">Humanos, 30 dias</div><div class="v lider">12.480</div></div>
+          <div><div class="r">Únicos por dia (soma)</div><div class="v">9.817</div></div>
+          <div><div class="r">Bots</div><div class="v">802</div></div>
+          <div><div class="r">Prévias</div><div class="v">431</div></div>
+        </div>
+        <div class="regua" role="img" aria-label="Humanos 91 por cento, bots 6 por cento, prévias 3 por cento">
+          <span class="h" style="flex: 12480"></span><span class="b" style="flex: 802"></span><span class="p" style="flex: 431"></span>
+        </div>
+        <p class="num" style="font-size: 12px">Humanos 12.480 (91 %) · Bots 802 (6 %) · Prévias 431 (3 %: WhatsApp 390, Slack 41). Só humanos entram no total e no limite de cliques.</p>
+      </div>
+
+      <h3>Linhas da tabela</h3>
+      <div class="folha" style="padding: 0 16px">
+        <div class="linha cab"><span>Link</span><span>Destino</span><span>Regras</span><span class="direita">Humanos (30 d)</span><span>Criado</span><span></span></div>
+        <div class="linha"><span><span class="mono">demo-promo</span><br /><span class="muted" style="font-size: 12px">Black Friday 2026</span></span><span class="muted">lojadamara.com.br</span><span class="chips"><span class="chip">Expira 12/12</span><span class="chip">iPhone → App Store</span></span><span class="direita num">12.480</span><span class="muted">2 nov.</span><span><button class="btn secundario">Copiar</button></span></div>
+        <div class="linha"><span><span class="mono">demo-docs</span><br /><span class="muted" style="font-size: 12px">MDN: 308 Permanent Redirect</span></span><span class="muted">developer.mozilla.org</span><span class="chips"><span class="chip">308</span></span><span class="direita num">0</span><span class="muted">5 nov.</span><span><button class="btn secundario">Copiar</button></span></div>
+      </div>
+
+      <h2 id="estados">Estados</h2>
+      <div class="faixa" aria-busy="true">
+        <div><div class="r">Humanos, 30 dias</div><span class="skel" style="width: 96px; height: 32px"></span></div>
+        <div><div class="r">Únicos por dia (soma)</div><span class="skel" style="width: 80px; height: 24px"></span></div>
+        <div><div class="r">Bots</div><span class="skel" style="width: 48px; height: 24px"></span></div>
+        <div><div class="r">Prévias</div><span class="skel" style="width: 48px; height: 24px"></span></div>
+      </div>
+      <p class="vazio" style="margin-top: 16px">Você ainda não criou nenhum link. Cole um endereço aqui em cima: o link curto sai na hora, e os cliques de gente aparecem nesta lista.</p>
+      <p class="folha" style="margin-top: 16px">Não deu para carregar os referrers. Últimos dados das 14:32. <button class="btn secundario">Tentar de novo</button></p>
+    </main>
+
+    <div class="barra-tema" role="group" aria-label="Tema">
+      <button class="btn" data-t="light">Claro</button><button class="btn" data-t="dark">Escuro</button>
+    </div>
+
+    <script>
+      const tokens = ['rosa-grafica', 'rosa-dado', 'rosa-texto', 'tinta', 'papel', 'folha', 'elevado', 'borda', 'controle', 'suave', 'apagada', 'positivo', 'negativo', 'aviso-tinta', 'cat-3', 'cat-4', 'cat-5'];
+      const pares = [
+        ['tinta', 'folha', 'texto principal', 4.5],
+        ['tinta', 'papel', 'texto no chão', 4.5],
+        ['suave', 'folha', 'secundário', 4.5],
+        ['apagada', 'folha', 'meta, placeholder', 4.5],
+        ['apagada', 'papel', 'meta no chão', 4.5],
+        ['apagada', 'elevado', 'meta em hover', 4.5],
+        ['rosa-texto', 'folha', 'link de texto', 4.5],
+        ['rosa-dado', 'folha', 'série, ponto ao vivo', 3],
+        ['controle', 'folha', 'borda de campo', 3],
+        ['positivo', 'folha', 'número melhor', 4.5],
+        ['negativo', 'folha', 'número pior', 4.5],
+        ['negativo-tinta', 'negativo-fundo', 'chip vencido', 4.5],
+        ['aviso-tinta', 'aviso-fundo', 'chip perto do limite', 4.5],
+        ['cat-3', 'folha', 'categoria 3', 3],
+        ['cat-4', 'folha', 'categoria 4', 3],
+        ['cat-5', 'folha', 'categoria 5', 3],
+      ];
+      const v = (n) => getComputedStyle(document.documentElement).getPropertyValue('--' + n).trim();
+      const lum = (hex) => {
+        const n = parseInt(hex.replace('#', ''), 16);
+        return [n >> 16, (n >> 8) & 255, n & 255]
+          .map((c) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+          .reduce((a, c, i) => a + c * [0.2126, 0.7152, 0.0722][i], 0);
+      };
+      const razao = (a, b) => {
+        const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+        return (x + 0.05) / (y + 0.05);
+      };
+      const fmt = (n) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      function desenhar() {
+        document.getElementById('grade-cores').innerHTML = tokens
+          .map((t) => {
+            const c = v(t);
+            const r = razao(c, v('folha'));
+            return `<div class="cor"><div class="chapa" style="background:${c};color:${razao(c, '#141414') > razao(c, '#ffffff') ? '#141414' : '#ffffff'}">${t}</div><div class="info num">${c}<br>${fmt(r)}:1 sobre folha</div></div>`;
+          })
+          .join('');
+        document.getElementById('pares').innerHTML = pares
+          .map(([a, b, uso, exige]) => {
+            const r = razao(v(a), v(b));
+            const ok = r >= exige;
+            return `<tr><td>${a} <span class="faint num">${v(a)}</span></td><td>${b} <span class="faint num">${v(b)}</span></td><td>${uso}</td><td class="num">${fmt(r)}</td><td class="num">${fmt(exige)}</td><td class="${ok ? 'ok' : 'falha'}">${ok ? 'passa' : 'falha'}</td></tr>`;
+          })
+          .join('');
+      }
+      document.querySelectorAll('.barra-tema button').forEach((b) => {
+        b.addEventListener('click', () => {
+          document.documentElement.dataset.theme = b.dataset.t;
+          document.querySelectorAll('.barra-tema button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+          desenhar();
+        });
+      });
+      const temaPedido = new URLSearchParams(location.search).get('tema');
+      if (temaPedido === 'light' || temaPedido === 'dark') document.documentElement.dataset.theme = temaPedido;
+      desenhar();
+      document.fonts.ready.then(() => {
+        const medir = (tab) => {
+          const s = document.createElement('span');
+          s.style.cssText = `font-family:Archivo;font-size:40px;position:absolute;visibility:hidden;font-variant-numeric:${tab ? 'tabular-nums' : 'normal'}`;
+          s.textContent = '1111';
+          document.body.append(s);
+          const w1 = s.getBoundingClientRect().width;
+          s.textContent = '0000';
+          const w0 = s.getBoundingClientRect().width;
+          s.remove();
+          return Math.abs(w1 - w0) < 0.5;
+        };
+        const carregada = document.fonts.check('16px Archivo');
+        const tab = medir(true);
+        document.getElementById('tnum').textContent = !carregada
+          ? 'A Archivo não carregou (sem rede?): a medição de algarismos tabulares não vale.'
+          : tab
+            ? 'Archivo carregada: com tabular-nums, 1111 e 0000 têm a mesma largura. Algarismos tabulares confirmados.'
+            : 'Archivo carregada, mas tabular-nums não iguala as larguras: usar JetBrains Mono nos números (DESIGN.md > Typography).';
+      });
+    </script>
+  </body>
+</html>

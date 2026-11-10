@@ -14,3 +14,8 @@ data/geo/
 
 # Resultados brutos do bench da fase 5 (corepack pnpm bench:*)
 packages/bench/results/
+
+# Impeccable: rascunhos de decisão (a escolha fica em .impeccable/surfaces e no DESIGN.md)
+apps/web/.impeccable/mocks/
+apps/web/.impeccable/questions/
+apps/web/.impeccable/review/

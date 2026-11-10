@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="pulo.">
+  <rect width="32" height="32" fill="#ff3d8b"/>
+  <!-- "p" condensado: haste e bojo retangular de cantos internos arredondados -->
+  <path fill="#141414" d="M9 7h5v1.6A5 5 0 0 1 17.5 7H18a5 5 0 0 1 5 5v5a5 5 0 0 1-5 5h-.5a5 5 0 0 1-3.5-1.4V28H9V7zm5 5.5v4a1.5 1.5 0 0 0 1.5 1.5h1A1.5 1.5 0 0 0 18 16.5v-4a1.5 1.5 0 0 0-1.5-1.5h-1a1.5 1.5 0 0 0-1.5 1.5z"/>
+  <!-- o ponto do wordmark -->
+  <rect x="24.5" y="18.5" width="3.5" height="3.5" fill="#141414"/>
+</svg>

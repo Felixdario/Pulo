@@ -1,0 +1,187 @@
+/*
+ * Tokens do Pulo (DESIGN.md, versão 0 da fase 6).
+ * Ainda não é importado por nenhum componente: a fase 7 liga este arquivo em main.tsx.
+ * Contrastes conferidos estão na tabela de DESIGN.md > Colors.
+ * Fontes: Archivo (variável, wdth 62–125, wght 100–900) e JetBrains Mono, auto-hospedadas na fase 7.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Rosa da gráfica */
+  --rosa-grafica: #ff3d8b; /* campo do cartaz; só com tinta por cima */
+  --rosa-dado: #e0136f; /* série de humanos, ponto ao vivo, cat-1 */
+  --rosa-texto: #c2185b; /* links de texto e delta do ao vivo */
+
+  /* Neutros */
+  --tinta: #141414;
+  --on-tinta: #ffffff;
+  --papel: #f4f4f1;
+  --folha: #ffffff;
+  --elevado: #edede9;
+  --borda: #e2e2dd;
+  --fio: #eeeeea;
+  --controle: #8c8c85;
+  --suave: #55554f;
+  --apagada: #6b6b64;
+
+  /* Status */
+  --positivo: #1f7a4c;
+  --positivo-fundo: #ddf5e6;
+  --positivo-tinta: #0b3b22;
+  --negativo: #b3261e;
+  --negativo-fundo: #fde7e5;
+  --negativo-tinta: #7a1610;
+  --aviso-fundo: #fff4d6;
+  --aviso-tinta: #8a4b00;
+
+  /* Gráficos */
+  --grade: #e6e6e1;
+  --cat-1: var(--rosa-dado);
+  --cat-2: var(--tinta);
+  --cat-3: #12805c;
+  --cat-4: #c25e00;
+  --cat-5: #2b5fb0;
+  --seq-1: #f7dce8;
+  --seq-2: #f2a9c8;
+  --seq-3: #ea6fa3;
+  --seq-4: #d93279;
+  --seq-5: #a3104f;
+  --seq-vazio: var(--elevado);
+
+  /* Tipo */
+  --fonte: 'Archivo', 'Arial Narrow', system-ui, sans-serif;
+  --fonte-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+  --largura-cartaz: 62;
+  --largura-numero: 75;
+  --largura-texto: 100;
+  --fs-cartaz: clamp(3.5rem, 1rem + 8vw, 8.5rem);
+  --fs-declaracao: clamp(1.75rem, 1.2rem + 2vw, 2.25rem);
+  --fs-lead: 1.25rem;
+  --fs-texto-landing: 1.0625rem;
+  --fs-numero: 32px;
+  --fs-titulo: 24px;
+  --fs-secao: 16px;
+  --fs-corpo: 14px;
+  --fs-rotulo: 12px;
+
+  /* Espaço (base 4 px) */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+  --esp-12: 48px;
+  --esp-16: 64px;
+  --esp-24: 96px;
+  --esp-40: 160px;
+  --margem-landing: clamp(16px, 3vw, 40px);
+  --largura-barra-lateral: 232px;
+  --calha-app: 32px;
+
+  /* Forma */
+  --raio-papel: 0;
+  --raio-chip: 2px;
+  --raio-controle: 4px;
+  --raio-folha: 6px;
+  --inclinacao-tira: -1.5deg;
+
+  /* Altura */
+  --altura-controle: 36px;
+  --altura-tira: 72px;
+  --altura-chip: 22px;
+  --altura-linha: 56px;
+  --altura-linha-dimensao: 44px;
+
+  /* Profundidade: só o que flutua */
+  --sombra-flutuante: 0 8px 24px rgb(20 20 20 / 0.12);
+
+  /* Foco */
+  --foco: 2px solid var(--tinta);
+  --foco-recuo: 2px;
+
+  /* Movimento (princípios em DESIGN.md > Motion) */
+  --ease-saida: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-retorno: 160ms;
+  --dur-assinatura: 420ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --rosa-grafica: #ff4f98;
+    --rosa-dado: #ff4f98;
+    --rosa-texto: #ff7fb4;
+    --tinta: #f2f2ef;
+    --on-tinta: #141414;
+    --papel: #0f0f0f;
+    --folha: #181818;
+    --elevado: #232323;
+    --borda: #2a2a2a;
+    --fio: #202020;
+    --controle: #6e6e6e;
+    --suave: #b5b5ae;
+    --apagada: #96968f;
+    --positivo: #4cc38a;
+    --positivo-fundo: #16291f;
+    --positivo-tinta: #4cc38a;
+    --negativo: #ff7b72;
+    --negativo-fundo: #2e1a19;
+    --negativo-tinta: #ff7b72;
+    --aviso-fundo: #2b2213;
+    --aviso-tinta: #f0b45a;
+    --grade: #262626;
+    --cat-3: #3fa37e;
+    --cat-4: #e8893a;
+    --cat-5: #6e9be8;
+    --seq-1: #3a1a28;
+    --seq-2: #6b2445;
+    --seq-3: #a8306a;
+    --seq-4: #e0468c;
+    --seq-5: #ff8cbe;
+    --sombra-flutuante: 0 8px 24px rgb(0 0 0 / 0.5);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --rosa-grafica: #ff4f98;
+  --rosa-dado: #ff4f98;
+  --rosa-texto: #ff7fb4;
+  --tinta: #f2f2ef;
+  --on-tinta: #141414;
+  --papel: #0f0f0f;
+  --folha: #181818;
+  --elevado: #232323;
+  --borda: #2a2a2a;
+  --fio: #202020;
+  --controle: #6e6e6e;
+  --suave: #b5b5ae;
+  --apagada: #96968f;
+  --positivo: #4cc38a;
+  --positivo-fundo: #16291f;
+  --positivo-tinta: #4cc38a;
+  --negativo: #ff7b72;
+  --negativo-fundo: #2e1a19;
+  --negativo-tinta: #ff7b72;
+  --aviso-fundo: #2b2213;
+  --aviso-tinta: #f0b45a;
+  --grade: #262626;
+  --cat-3: #3fa37e;
+  --cat-4: #e8893a;
+  --cat-5: #6e9be8;
+  --seq-1: #3a1a28;
+  --seq-2: #6b2445;
+  --seq-3: #a8306a;
+  --seq-4: #e0468c;
+  --seq-5: #ff8cbe;
+  --sombra-flutuante: 0 8px 24px rgb(0 0 0 / 0.5);
+}
+
+/* Texto sobre o cartaz é sempre tinta escura, nos dois temas. */
+.sobre-rosa {
+  --tinta: #141414;
+  --suave: #141414;
+  color: #141414;
+}
