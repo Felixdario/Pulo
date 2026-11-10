@@ -53,8 +53,9 @@ isso em vez de vender "visitantes únicos" como se fossem pessoas.
 - **Redirect** (`apps/redirect`): `GET /:slug` → 30x. Páginas próprias e pequenas para 404, 410
   (expirou ou atingiu o limite), 429 e o formulário de senha. Desativado e inexistente dão a mesma
   resposta.
-- **API** (`apps/api`, `/v1`): autenticação (cookie httpOnly no web, JWT e chaves de API), links (CRUD,
-  busca `q` com pg_trgm, regras), prévia do destino (título, descrição, imagem, favicon, nº de
+- **API** (`apps/api`, `/v1`): autenticação (JWT curto em memória com refresh em cookie
+  httpOnly no web, mais chaves de API com escopos; ADR 0004), links (CRUD, busca `q` com `ILIKE`, já
+  que o pg_trgm foi adiado pela medição do ADR 0005, e regras), prévia do destino (título, descrição, imagem, favicon, nº de
   redirects), estatísticas por período, visão geral da conta, chaves de API e SSE ao vivo
   (`live:<user_id>`, atraso de até ~500 ms depois do commit).
 - **Link anônimo**: `POST` público, slug aleatório, expira em 30 dias, sem alias, regras ou senha,
