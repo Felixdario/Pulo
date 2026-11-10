@@ -9,6 +9,8 @@ export interface CreateDbOptions {
   max?: number;
   /** Recebe cada query enviada (usado nos testes para provar que não há SELECT antes do INSERT). */
   onQuery?: (query: string) => void;
+  /** `statement_timeout` da sessão, em ms: uma espera de lock não prende o processo para sempre. */
+  statementTimeoutMs?: number;
 }
 
 /**
@@ -26,6 +28,9 @@ export function createDb(
     max: options.max ?? 10,
     onnotice: () => {},
     ...(onQuery ? { debug: (_conn: number, query: string) => onQuery(query) } : {}),
+    ...(options.statementTimeoutMs
+      ? { connection: { statement_timeout: options.statementTimeoutMs } }
+      : {}),
   });
   const db = drizzle(sql, { schema });
   return { db, sql, close: () => sql.end({ timeout: 5 }) };

@@ -8,3 +8,6 @@ coverage
 
 # log da dupla de agentes (local)
 .dupla/
+
+# Bases do DB-IP baixadas por pnpm geo:download
+data/geo/

@@ -57,6 +57,8 @@ export const links = pgTable(
     maxClicks: integer('max_clicks'),
     passwordHash: text('password_hash'),
     forwardQuery: boolean('forward_query').notNull().default(true),
+    /** Cliques humanos processados pelo worker (mesma instrução dos agregados). */
+    clickCount: bigint('click_count', { mode: 'number' }).notNull().default(0),
     rules: jsonb('rules').$type<LinkRules>().notNull().default({}),
     createdAt: createdAt(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

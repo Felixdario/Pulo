@@ -254,3 +254,13 @@ export async function findLinkBySlug(db: Executor, slug: string): Promise<Link |
   const [link] = await db.select().from(links).where(eq(links.slug, slug)).limit(1);
   return link ?? null;
 }
+
+/** Cliques humanos já processados pelo worker (`links.click_count`); inicializa o limite no Redis. */
+export async function getClickCount(db: Executor, linkId: number): Promise<number> {
+  const [row] = await db
+    .select({ n: links.clickCount })
+    .from(links)
+    .where(eq(links.id, linkId))
+    .limit(1);
+  return row?.n ?? 0;
+}

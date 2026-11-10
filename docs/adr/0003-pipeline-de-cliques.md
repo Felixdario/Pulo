@@ -1,6 +1,7 @@
 # ADR 0003 — Pipeline de cliques
 
-- **Status:** rascunho (fase 0). É validado em modo trio na fase 3.
+- **Status:** aceito (fase 3, validado em modo trio). As mudanças em relação ao rascunho estão em
+  "Resultado da fase 3".
 - **Data:** 2026-11-09
 
 ## Contexto
@@ -138,6 +139,39 @@ XREADGROUP GROUP workers <consumer> COUNT 1000 BLOCK 2000 STREAMS clicks >
   `preview` e `bot` entram só nos contadores por tipo (`clicks_hourly.previews` e `.bots`) e em
   `clicks_daily_preview(app)`. As dimensões (país, cidade, referrer, navegador, sistema, dispositivo) e
   os únicos são **só de humanos**.
+
+## Resultado da fase 3
+
+O Validador independente achou duas falhas graves no primeiro desenho e quatro menores. Todas foram
+corrigidas e os testes dele viraram regressões (`apps/worker/test/integration/regressions.test.ts`).
+
+| Problema encontrado | Antes | Correção | Depois |
+| - | - | - | - |
+| O reclaim pegava mensagens do **próprio lote em andamento** quando o Postgres ficava lento. Cada claim somava entrega e, com 5 entregas, um evento **válido** ia para `:dead` | 3.000 eventos geraram 5.477 entradas em `:dead` | O worker guarda os ids `inFlight` e mantém o idle deles baixo com um batimento (`XCLAIM … JUSTID`, que não soma entrega). Trocamos `XAUTOCLAIM` por `XPENDING IDLE` + `XCLAIM` com min-idle, porque o `XAUTOCLAIM` não permite excluir os próprios ids. `:dead` conta **falhas reais**: parse inválido vai direto; erro de dado do Postgres (classes 22 e 23) soma em `HINCRBY <stream>:fails` e mata com 5. A ida para `:dead` é um Lua atômico (XADD só se o XACK devolveu 1) | `:dead` = 0, contagens exatas |
+| O mesmo `event_id` com `ts` diferente caía em outra chave `(occurred_at, event_id)` | 3 linhas | `occurred_at` passa a vir dos 48 bits de tempo do **UUIDv7**, e o `ts` só é conferido (`clicks_ts_mismatch_total`). Um id que não seja UUIDv7 vai para `:dead` | 1 linha |
+| Stream ou grupo apagado no Redis (FLUSH, restart sem AOF) | `NOGROUP` em loop eterno | Todo comando de stream recria o grupo (`XGROUP CREATE … 0 MKSTREAM`) e segue | eventos processados |
+| Clique de link apagado contado como duplicata | `duplicates:2` | A instrução devolve quantos eventos eram de link existente: `unknown_link = válidos − conhecidos` e `duplicates = conhecidos − inseridos` | `duplicates:0` |
+| `android-app://joao:senha@…` e país `XX` gravados | gravados | O pacote precisa casar `^[a-z0-9_]+(\.[a-z0-9_]+)+$` (senão vira `(desconhecido)`); referrer com IP literal vira `(ip)`; `normalizeCountry` descarta pseudocódigos | limpos |
+| `stop()` pendurado com o Postgres preso num lock | não voltava | `statement_timeout` de 30 s e prazo no `stop()`; o PEL cobre o lote | < 1,5 s |
+
+Decisões da implementação:
+- **Uma tabela para as dimensões:** `clicks_daily_dim(link_id, dim, day, value, n)`, com PK nessa
+  ordem. O "top N países no período" vira um intervalo contíguo da PK. Cidade é gravada como
+  `BR/São Paulo`, para não juntar cidades homônimas de países diferentes.
+- `links.click_count` (humanos) é atualizado na mesma instrução. Antes, um `SELECT … ORDER BY id FOR
+  UPDATE` trava as linhas de `links`; sem ele, o `UPDATE … FROM` causou 8 deadlocks em 100 mil eventos.
+- Erro transitório do Postgres repete o lote no próprio processo e não conta como falha. Assim uma queda
+  do banco não manda tudo para `:dead`.
+- A geolocalização ficou num pacote próprio, `packages/geo`, para o `shared` continuar sem I/O. Sem o
+  arquivo mmdb, país e cidade ficam `null` e o pipeline segue.
+
+Números (Ryzen 5 5500, Postgres e Redis no Docker Desktop):
+
+| Cenário | Resultado |
+| - | - |
+| 1 worker, lotes de 1.000 | ~6.300–6.700 eventos/s (lote médio de 135–148 ms) |
+| 4 workers, 100.000 eventos | 12,7–14,6 s, ou seja, ~6.900–7.900 eventos/s, sem nenhum deadlock em 7 rodadas |
+| Consistência em 100 mil eventos | bruta = hourly = daily por tipo; únicos = DISTINCT na bruta; soma de cada dimensão = humanos |
 
 ## Consequências
 

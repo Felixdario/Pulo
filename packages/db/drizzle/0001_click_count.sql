@@ -1,0 +1,1 @@
+ALTER TABLE "links" ADD COLUMN "click_count" bigint DEFAULT 0 NOT NULL;

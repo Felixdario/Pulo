@@ -25,10 +25,12 @@ import {
   hasGeoRules,
   isReservedSlug,
   mergeQuery,
+  normalizeCountry,
   resolveDestination,
   SHARED_VERSION,
   type ResolveContext,
 } from '@encurtador/shared';
+import type { CountryLookup } from '@encurtador/geo';
 import formbody from '@fastify/formbody';
 import { verify as verifyPassword } from '@node-rs/argon2';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
@@ -39,10 +41,8 @@ import { createMetrics, type CacheLabel } from './metrics';
 import { sendPasswordForm, sendProblem } from './pages';
 import { hasValidUnlock, makeUnlockCookie } from './unlock';
 
-/** Consulta de país por IP. A fase 3 liga ao mmdb do DB-IP; por enquanto ninguém responde. */
-export interface CountryLookup {
-  lookup(ip: string): string | null;
-}
+/** Consulta de país por IP (mmdb do DB-IP Country Lite em produção; ver @encurtador/geo). */
+export type { CountryLookup } from '@encurtador/geo';
 export const noCountryLookup: CountryLookup = { lookup: () => null };
 
 export interface RedirectDeps {
@@ -245,8 +245,8 @@ export function buildApp(deps: RedirectDeps) {
     const peer = req.socket.remoteAddress ?? '';
     if (config.devTrustXff || isTrustedPeer(peer)) {
       const h = req.headers['cf-ipcountry'] ?? req.headers['x-country'];
-      const v = (Array.isArray(h) ? h[0] : h)?.trim().toUpperCase();
-      if (v && /^[A-Z]{2}$/.test(v) && v !== 'XX') return v;
+      const v = normalizeCountry(Array.isArray(h) ? h[0] : h);
+      if (v) return v;
     }
     return withLookup ? countryLookup.lookup(req.ip) : null;
   };

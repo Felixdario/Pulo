@@ -64,3 +64,6 @@ jobs:
 
       # Fase 2: redirect contra o Postgres (encurtador_test) e o Redis (db 1) dos services.
       - run: pnpm --filter @encurtador/redirect test:integration
+
+      # Fase 3: pipeline de cliques (worker, inclusive 4 workers × 100.000 eventos e fim a fim).
+      - run: pnpm --filter @encurtador/worker test:integration

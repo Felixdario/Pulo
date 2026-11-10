@@ -3,6 +3,7 @@ export {
   createLink,
   createLinks,
   findLinkBySlug,
+  getClickCount,
   DEFAULT_MAX_ATTEMPTS,
   InvalidAliasError,
   SlugExhaustedError,
@@ -14,6 +15,7 @@ export {
   type Executor,
 } from './links';
 export * as schema from './schema';
+export * from './analytics';
 export { links, users, type Link, type NewLink, type RedirectType, type User } from './schema';
 
 /** Operadores do Drizzle reexportados, para os apps usarem a mesma instância do pacote. */

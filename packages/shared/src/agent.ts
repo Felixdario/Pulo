@@ -21,3 +21,27 @@ export function classifyAgent(ua: string | undefined | null, method = 'GET'): Ag
   if (isbot(agent)) return 'bot';
   return 'human';
 }
+
+/** App de prévia, na ordem: o UA do iMessage, por exemplo, também cita facebookexternalhit. */
+const PREVIEW_APPS: [RegExp, string][] = [
+  [/WhatsApp/i, 'whatsapp'],
+  [/Slackbot-LinkExpanding|Slack-ImgProxy/i, 'slack'],
+  [/TelegramBot/i, 'telegram'],
+  [/Discordbot/i, 'discord'],
+  [/LinkedInBot/i, 'linkedin'],
+  [/SkypeUriPreview/i, 'skype'],
+  [/redditbot/i, 'reddit'],
+  [/Embedly/i, 'embedly'],
+  [/Iframely/i, 'iframely'],
+  [/Applebot|facebookexternalhit\/1\.1 Facebot Twitterbot/i, 'imessage'],
+  [/Twitterbot/i, 'twitter'],
+  [/facebookexternalhit|Facebot/i, 'facebook'],
+];
+
+/** Qual app gerou a prévia (`whatsapp`, `slack`…), ou null se o UA não é de prévia. */
+export function previewApp(ua: string | undefined | null): string | null {
+  const agent = ua ?? '';
+  if (!PREVIEW.test(agent)) return null;
+  for (const [re, app] of PREVIEW_APPS) if (re.test(agent)) return app;
+  return 'other';
+}

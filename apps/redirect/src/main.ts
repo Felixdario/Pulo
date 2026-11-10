@@ -1,4 +1,5 @@
-import { createDb } from '@encurtador/db';
+import { createDb, getClickCount } from '@encurtador/db';
+import { createMmdbCountryLookup } from '@encurtador/geo';
 import { Redis } from 'ioredis';
 import { buildApp } from './app';
 import { loadConfig } from './config';
@@ -18,7 +19,19 @@ redis.on('error', () => {
   // Já contado e logado no caminho da requisição; evita "Unhandled error event".
 });
 
-const app = buildApp({ db, redis, config });
+// País para as regras de geo: DB-IP Country Lite se o arquivo existir (pnpm geo:download); sem ele,
+// só os cabeçalhos de proxy confiável valem e a busca devolve null.
+const countryLookup = await createMmdbCountryLookup(undefined, {
+  warn: (obj, msg) => console.warn(JSON.stringify({ level: 40, msg, ...obj })),
+});
+
+const app = buildApp({
+  db,
+  redis,
+  config,
+  countryLookup,
+  loadClickTotal: (linkId) => getClickCount(db, linkId),
+});
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {

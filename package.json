@@ -13,7 +13,8 @@
     "test": "corepack pnpm -r test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "bench:redirect": "tsx scripts/bench-redirect.ts"
+    "bench:redirect": "tsx scripts/bench-redirect.ts",
+    "geo:download": "tsx scripts/geo-download.ts"
   },
   "devDependencies": {
     "@encurtador/db": "workspace:*",

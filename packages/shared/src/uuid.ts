@@ -19,3 +19,16 @@ export function uuidv7(now: number = Date.now()): string {
     .slice(8, 10)
     .join('')}-${h.slice(10).join('')}`;
 }
+
+const UUIDV7 = /^([0-9a-f]{8})-([0-9a-f]{4})-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Os 48 bits de tempo (epoch ms) de um UUIDv7, ou null se não for um UUIDv7 válido (versão 7,
+ * variante RFC). O worker usa isso como `occurred_at`: o instante fica preso ao `event_id`, então
+ * uma reentrega com outro `ts` cai na mesma chave e é deduplicada.
+ */
+export function uuidv7Timestamp(id: string): number | null {
+  const m = UUIDV7.exec(id);
+  if (!m) return null;
+  return parseInt(m[1]! + m[2]!, 16);
+}
