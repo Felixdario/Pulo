@@ -71,6 +71,11 @@ jobs:
       # Fase 4: API /v1 por rota (auth, chaves, links, stats, SSE, prévia, público, OpenAPI, seed).
       - run: pnpm --filter @encurtador/api test:integration
 
+      # Fase 7: e2e do web contra a stack real (API, redirect, worker e web), num banco próprio
+      # (encurtador_e2e) e no Redis db 2. Usa o Google Chrome que já vem no runner (canal `chrome`),
+      # sem `playwright install`. Sem as bases do DB-IP, país e cidade ficam "desconhecido".
+      - run: pnpm test:e2e
+
       # Fase 5: seed grande em tamanho de CI (50 mil cliques, banco encurtador_bench) e consistência
       # agregado × bruta, inclusive ponta a ponta com o worker real.
       - run: pnpm seed:big --clicks=50000

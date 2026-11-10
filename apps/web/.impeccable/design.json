@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T15:00:00-03:00",
+  "title": "Design System: Pulo",
+  "extensions": {
+    "colorMeta": {
+      "rosa-grafica": {
+        "role": "primary",
+        "displayName": "Rosa da gráfica (papel do cartaz)",
+        "canonical": "#ff3d8b",
+        "tonalRamp": [
+          "#4a0a24",
+          "#7a1240",
+          "#b01d5e",
+          "#e0136f",
+          "#ff3d8b",
+          "#ff7fb4",
+          "#ffb8d4",
+          "#ffe6f0"
+        ]
+      },
+      "rosa-dado": {
+        "role": "primary",
+        "displayName": "Rosa do dado (cliques humanos)",
+        "canonical": "#e0136f"
+      },
+      "rosa-texto": {
+        "role": "primary",
+        "displayName": "Rosa de texto (links e delta do ao vivo)",
+        "canonical": "#c2185b"
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#141414",
+        "tonalRamp": [
+          "#141414",
+          "#2a2a2a",
+          "#55554f",
+          "#6b6b64",
+          "#8c8c85",
+          "#e2e2dd",
+          "#edede9",
+          "#f4f4f1"
+        ]
+      },
+      "papel": {
+        "role": "neutral",
+        "displayName": "Papel-jornal (chão do app)",
+        "canonical": "#f4f4f1"
+      },
+      "folha": {
+        "role": "neutral",
+        "displayName": "Folha (cartões e tabelas)",
+        "canonical": "#ffffff"
+      },
+      "elevado": {
+        "role": "neutral",
+        "displayName": "Elevado (hover, chip, esqueleto)",
+        "canonical": "#edede9"
+      }
+    },
+    "typographyMeta": {
+      "cartaz": {
+        "displayName": "Cartaz",
+        "purpose": "Frase da landing e fechamento; Archivo largura 62, peso 850, caixa-alta."
+      },
+      "declaracao": {
+        "displayName": "Declaração",
+        "purpose": "Títulos de seção e perguntas da landing; largura 75."
+      },
+      "numero": {
+        "displayName": "Número",
+        "purpose": "O maior número da tela e o contador ao vivo; largura 75, tabular."
+      },
+      "titulo": { "displayName": "Título", "purpose": "Título de cada tela do app." },
+      "corpo": { "displayName": "Corpo", "purpose": "Células, navegação e formulários; tabular." },
+      "rotulo": {
+        "displayName": "Rótulo",
+        "purpose": "Rótulos, eixos e chips; nunca abaixo de 12 px."
+      },
+      "slug": {
+        "displayName": "Slug",
+        "purpose": "Link curto, chave de API e código; JetBrains Mono."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sombra-flutuante",
+        "value": "0 8px 24px rgb(20 20 20 / 0.12)",
+        "purpose": "Só no que flutua: menu, dica, diálogo e aviso. No escuro, 0 8px 24px rgb(0 0 0 / 0.5)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-saida",
+        "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Toda entrada e saída de UI."
+      },
+      {
+        "name": "dur-retorno",
+        "value": "160ms",
+        "purpose": "Pressionar, hover, menus, dicas e o papel que endireita."
+      },
+      {
+        "name": "dur-assinatura",
+        "value": "420ms",
+        "purpose": "A tira nova colada na landing e o link condensando (wdth 100 → 62)."
+      },
+      {
+        "name": "dur-delta",
+        "value": "600ms",
+        "purpose": "O delta do contador ao vivo acende; sublinha no reduced-motion."
+      },
+      {
+        "name": "dur-dialogo",
+        "value": "200ms",
+        "purpose": "Diálogos centrados (scale 0.97 + opacidade)."
+      }
+    ],
+    "breakpoints": [
+      { "name": "celular", "value": "640px" },
+      { "name": "tablet", "value": "1100px" },
+      { "name": "lista-sem-destino", "value": "1320px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "botao-primario",
+      "description": "Ação principal do app (Encurtar, Copiar, Salvar). Tinta, raio 4, 36 px.",
+      "html": "<button class=\"ds-btn-primario\">Encurtar</button>",
+      "css": ".ds-btn-primario{height:36px;padding:0 16px;border:0;border-radius:4px;background:var(--tinta,#141414);color:var(--on-tinta,#fff);font:600 14px/1 'Archivo Variable',Archivo,sans-serif;cursor:pointer;transition:transform 160ms cubic-bezier(.2,.8,.2,1),background-color 160ms ease}.ds-btn-primario:hover{background:color-mix(in srgb,var(--tinta,#141414) 86%,#fff)}.ds-btn-primario:active{transform:scale(.97)}.ds-btn-primario:focus-visible{outline:2px solid var(--tinta,#141414);outline-offset:2px}"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "botao-secundario",
+      "description": "Ações de apoio (QR, Editar regras, Carregar mais).",
+      "html": "<button class=\"ds-btn-secundario\">Editar regras</button>",
+      "css": ".ds-btn-secundario{height:36px;padding:0 14px;border:0;border-radius:4px;background:var(--elevado,#edede9);color:var(--tinta,#141414);font:600 14px/1 'Archivo Variable',Archivo,sans-serif;cursor:pointer;transition:transform 160ms cubic-bezier(.2,.8,.2,1)}.ds-btn-secundario:active{transform:scale(.97)}.ds-btn-secundario:focus-visible{outline:2px solid var(--tinta,#141414);outline-offset:2px}"
+    },
+    {
+      "name": "Botão do cartaz",
+      "kind": "button",
+      "refersTo": "botao-cartaz",
+      "description": "Encurtar e Copiar na tira da landing: 56 px, canto reto.",
+      "html": "<button class=\"ds-btn-cartaz\">Encurtar</button>",
+      "css": ".ds-btn-cartaz{height:56px;padding:0 28px;border:0;border-radius:0;background:#141414;color:#fff;font:700 17px/1 'Archivo Variable',Archivo,sans-serif;cursor:pointer;transition:transform 160ms cubic-bezier(.2,.8,.2,1)}.ds-btn-cartaz:active{transform:scale(.97)}.ds-btn-cartaz:focus-visible{outline:2px solid #141414;outline-offset:2px}"
+    },
+    {
+      "name": "Campo",
+      "kind": "input",
+      "refersTo": "campo",
+      "description": "Campo do app com rótulo visível acima e erro abaixo.",
+      "html": "<label class=\"ds-rotulo\">Alias (opcional)<input class=\"ds-campo\" placeholder=\"black-friday\"></label>",
+      "css": ".ds-rotulo{display:grid;gap:6px;font:500 12px/16px 'Archivo Variable',Archivo,sans-serif;color:var(--suave,#55554f)}.ds-campo{height:36px;padding:0 12px;border:1px solid var(--controle,#8c8c85);border-radius:4px;background:var(--folha,#fff);color:var(--tinta,#141414);font:400 14px 'JetBrains Mono Variable',monospace}.ds-campo:focus-visible{outline:2px solid var(--tinta,#141414);outline-offset:0;border-color:var(--tinta,#141414)}"
+    },
+    {
+      "name": "Chip de regra",
+      "kind": "chip",
+      "refersTo": "chip-regra",
+      "description": "Cada regra como frase curta; aviso perto do limite, negativo quando venceu.",
+      "html": "<span class=\"ds-chip\">Para em 500</span> <span class=\"ds-chip ds-chip-aviso\">Faltam 12 de 500</span> <span class=\"ds-chip ds-chip-negativo\">Limite atingido</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:2px;background:var(--elevado,#edede9);color:var(--tinta,#141414);font:500 12px/1 'Archivo Variable',Archivo,sans-serif}.ds-chip-aviso{background:var(--aviso-fundo,#fff4d6);color:var(--aviso-tinta,#8a4b00)}.ds-chip-negativo{background:var(--negativo-fundo,#fde7e5);color:var(--negativo-tinta,#7a1610)}"
+    },
+    {
+      "name": "Tira colada",
+      "kind": "custom",
+      "refersTo": "tira-url",
+      "description": "O formulário da landing: papel branco a -1,5°, que endireita no foco e no hover.",
+      "html": "<form class=\"ds-tira\"><label>Link para encurtar<input placeholder=\"https://sualoja.com.br/black-friday\"></label><button type=\"button\">Encurtar</button></form>",
+      "css": ".ds-tira{display:flex;align-items:center;gap:12px;max-width:640px;min-height:72px;padding:0 8px 0 20px;background:#fff;color:#141414;transform:rotate(-1.5deg);transition:transform 160ms ease;font-family:'Archivo Variable',Archivo,sans-serif}.ds-tira:hover,.ds-tira:focus-within{transform:rotate(0)}.ds-tira label{display:grid;flex:1;font:600 12px/16px inherit;color:#55554f}.ds-tira input{border:0;font:500 17px inherit;color:#141414;outline:none}.ds-tira button{height:56px;padding:0 28px;border:0;background:#141414;color:#fff;font:700 17px inherit}"
+    },
+    {
+      "name": "Régua honesta",
+      "kind": "custom",
+      "refersTo": "regua-honesta",
+      "description": "Humanos em rosa, bots em hachura e prévias em pontilhado, numa barra só com rótulos.",
+      "html": "<div class=\"ds-regua\"><span style=\"flex-grow:91\" class=\"h\"></span><span style=\"flex-grow:6\" class=\"b\"></span><span style=\"flex-grow:3\" class=\"p\"></span></div><p class=\"ds-regua-l\">Humanos 12.480 (91 %) · Bots 802 · Prévias 431</p>",
+      "css": ".ds-regua{display:flex;gap:2px;height:12px}.ds-regua .h{background:var(--rosa-dado,#e0136f)}.ds-regua .b{background:var(--elevado,#edede9) repeating-linear-gradient(45deg,var(--apagada,#6b6b64) 0 1px,transparent 1px 4px)}.ds-regua .p{background:var(--elevado,#edede9) radial-gradient(var(--apagada,#6b6b64) .8px,transparent 1px) 0 0/4px 4px}.ds-regua-l{font:400 14px 'Archivo Variable',Archivo,sans-serif;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Navegação lateral",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Casca Open plane: itens de 34 px no chão de papel; o ativo é um fundo elevado, sem barra colorida.",
+      "html": "<nav class=\"ds-nav\"><a aria-current=\"page\">Links</a><a>Chaves de API</a></nav>",
+      "css": ".ds-nav{display:grid;gap:2px;width:200px;font:500 14px 'Archivo Variable',Archivo,sans-serif}.ds-nav a{display:flex;align-items:center;height:34px;padding:0 8px;border-radius:4px;color:var(--suave,#55554f);text-decoration:none}.ds-nav a[aria-current=page]{background:var(--elevado,#edede9);color:var(--tinta,#141414);font-weight:600}"
+    }
+  ],
+  "narrative": {
+    "northStar": "O cartaz e o livro-caixa.",
+    "overview": "O Pulo tem duas caras, e as duas vêm do mesmo mundo: o lambe-lambe de gráfica popular. A landing é o cartaz rosa com a frase condensada e a tira de papel colada por cima; o app é o livro-caixa da gráfica, em papel e tinta, com o rosa só onde o dado importa: os cliques humanos e o ponto do ao vivo.",
+    "keyCharacteristics": [
+      "Claro por padrão; o escuro acompanha o sistema e é um tema completo.",
+      "Uma família tipográfica (Archivo) em três larguras, mais uma mono só para slugs, chaves e código.",
+      "Cantos retos no cartaz e quase retos no app (2, 4 e 6 px). Nada de pílula.",
+      "Superfícies chapadas: borda de 1 px no app e nenhuma sombra em repouso.",
+      "Rosa só em dado, no foco do cartaz e no ao vivo. Status sempre com texto e forma."
+    ],
+    "rules": [],
+    "dos": [
+      "Ponha o link curto como o maior texto da linha e o Copiar a um clique.",
+      "Escreva cada regra como frase antes de mostrar o campo.",
+      "Mostre bots e prévias à parte, sempre, e diga que os únicos são por dia.",
+      "Use o rosa em campos inteiros na landing e só em dado no app.",
+      "Mantenha tudo em tinta sobre o rosa."
+    ],
+    "donts": [
+      "Gradiente, vidro, brilho, sombra em repouso ou sombra dura deslocada.",
+      "Pílula redonda, card de KPI com ícone em círculo, sparkline em KPI, gráfico arco-íris.",
+      "Rótulo pequeno em caixa-alta espaçada acima de título, ou numeração 01/02/03.",
+      "Mono como fantasia técnica: ela é só para slug, chave e código.",
+      "Inventar prova: clientes, depoimentos, \"milhares de links encurtados\" ou preço.",
+      "Herdar qualquer coisa do Pontual: Hanken Grotesk, cobalto, pílulas, raio de 16 px."
+    ]
+  }
+}

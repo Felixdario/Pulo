@@ -121,6 +121,8 @@ describe('ordem das regras (ADR 0002, seção 2)', () => {
     const res = await get(a, '/velho');
     expect(res.statusCode).toBe(410);
     expect(res.body).toContain('Este link expirou');
+    // A página diz até quando o link valia (fase 7).
+    expect(res.body).toContain('Quem criou este link definiu que ele valia até');
     expect(res.headers['cache-control']).toBe('no-store');
     expect((await get(a, '/velho', { accept: 'application/json' })).json()).toMatchObject({
       status: 410,
@@ -222,6 +224,7 @@ describe('ordem das regras (ADR 0002, seção 2)', () => {
     const third = await get(a, '/unico');
     expect(third.statusCode).toBe(410);
     expect(third.body).toContain('atingiu o limite');
+    expect(third.body).toContain('Ele foi criado para 2 cliques, e todos já foram usados.');
     // Esgotado vale para robôs também (mas eles não incrementam).
     expect((await get(a, '/unico', { 'user-agent': UA.whatsapp })).statusCode).toBe(410);
     expect(await redis.get('cap:1')).toBe('3');

@@ -2,8 +2,20 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Encurtador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Encurte links e conte só gente: robôs e prévias do WhatsApp ficam à parte."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Pulo: encurte links, conte só gente</title>
+    <script>
+      // Tema escolhido à mão, antes do primeiro paint (sem piscar). Sem escolha, vale o sistema.
+      try {
+        var t = localStorage.getItem('pulo-tema');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -278,7 +278,7 @@ export function buildApp(deps: RedirectDeps) {
 
     // 5. expirado.
     if (link.expiresAt !== null && link.expiresAt <= Date.now()) {
-      return sendProblem(req, reply, 'expired');
+      return sendProblem(req, reply, 'expired', { expiresAt: link.expiresAt });
     }
 
     // 6. senha sem cookie de desbloqueio.
@@ -303,7 +303,7 @@ export function buildApp(deps: RedirectDeps) {
           loadClickTotal(link.id),
         );
         if (kind === 'human' ? count > link.maxClicks : count >= link.maxClicks) {
-          return sendProblem(req, reply, 'limit_reached');
+          return sendProblem(req, reply, 'limit_reached', { maxClicks: link.maxClicks });
         }
       } catch (err) {
         // Sem Redis não há contador: o link continua funcionando (ADR: não derrubar redirects).
@@ -377,7 +377,7 @@ export function buildApp(deps: RedirectDeps) {
       const { link } = found;
       if (!link || link.status !== 'active') return sendProblem(req, reply, 'not_found');
       if (link.expiresAt !== null && link.expiresAt <= Date.now()) {
-        return sendProblem(req, reply, 'expired');
+        return sendProblem(req, reply, 'expired', { expiresAt: link.expiresAt });
       }
       const q = rawQuery(req.url);
       const target = `/${slug}${q ? `?${q}` : ''}`;

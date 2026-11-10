@@ -59,27 +59,27 @@ colors:
   dark-seq-5: '#ff8cbe'
 typography:
   cartaz:
-    fontFamily: 'Archivo, Arial Narrow, sans-serif'
+    fontFamily: 'Archivo Variable, Archivo, Arial Narrow, sans-serif'
     fontSize: 'clamp(3.5rem, 1rem + 8vw, 8.5rem)'
     fontWeight: 850
     lineHeight: 0.9
     letterSpacing: '-0.02em'
     fontVariation: "'wdth' 62"
   declaracao:
-    fontFamily: 'Archivo, sans-serif'
+    fontFamily: 'Archivo Variable, Archivo, sans-serif'
     fontSize: 'clamp(1.75rem, 1.2rem + 2vw, 2.25rem)'
     fontWeight: 700
     lineHeight: 1.1
     letterSpacing: '-0.01em'
     fontVariation: "'wdth' 75"
   texto-landing:
-    fontFamily: 'Archivo, sans-serif'
+    fontFamily: 'Archivo Variable, Archivo, sans-serif'
     fontSize: '1.0625rem'
     fontWeight: 400
     lineHeight: 1.55
     fontVariation: "'wdth' 100"
   numero:
-    fontFamily: 'Archivo, sans-serif'
+    fontFamily: 'Archivo Variable, Archivo, sans-serif'
     fontSize: '32px'
     fontWeight: 650
     lineHeight: '36px'
@@ -87,30 +87,30 @@ typography:
     fontFeature: 'tnum'
     fontVariation: "'wdth' 75"
   titulo:
-    fontFamily: 'Archivo, sans-serif'
+    fontFamily: 'Archivo Variable, Archivo, sans-serif'
     fontSize: '24px'
     fontWeight: 700
     lineHeight: '30px'
     letterSpacing: '-0.01em'
   secao:
-    fontFamily: 'Archivo, sans-serif'
+    fontFamily: 'Archivo Variable, Archivo, sans-serif'
     fontSize: '16px'
     fontWeight: 600
     lineHeight: '24px'
   corpo:
-    fontFamily: 'Archivo, sans-serif'
+    fontFamily: 'Archivo Variable, Archivo, sans-serif'
     fontSize: '14px'
     fontWeight: 400
     lineHeight: '20px'
     fontFeature: 'tnum'
   rotulo:
-    fontFamily: 'Archivo, sans-serif'
+    fontFamily: 'Archivo Variable, Archivo, sans-serif'
     fontSize: '12px'
     fontWeight: 500
     lineHeight: '16px'
     fontFeature: 'tnum'
   slug:
-    fontFamily: 'JetBrains Mono, ui-monospace, monospace'
+    fontFamily: 'JetBrains Mono Variable, JetBrains Mono, ui-monospace, monospace'
     fontSize: '14px'
     fontWeight: 500
     lineHeight: '20px'
@@ -192,11 +192,12 @@ components:
 
 # Design System: Pulo
 
-> **Versão 0, escrita antes da interface (fase 6).** Os tokens daqui também estão em
-> `apps/web/src/styles/tokens.css`, e a conferência visual fica em `docs/design/amostra.html`. A
-> direção, os nomes e as referências estão em `docs/design/direcao.md`. Quando a fase 7 construir as
-> telas, `impeccable document` reescreve este arquivo a partir do código. Se os dois divergirem, vale o
-> código, e este arquivo precisa ser atualizado.
+> **Versão 1, documentada a partir do código da fase 7** (`impeccable document`, modo scan, em merge
+> com a versão 0 da fase 6). Os tokens normativos estão em `apps/web/src/styles/tokens.css` e no
+> frontmatter acima; a base, o app e a landing estão em `apps/web/src/styles/{base,app,landing}.css`.
+> O sidecar `apps/web/.impeccable/design.json` traz movimento, sombras, pontos de quebra e os
+> componentes de referência. A direção, os nomes e as referências estão em `docs/design/direcao.md`.
+> Se este arquivo e o código divergirem, vale o código, e este arquivo precisa ser atualizado.
 
 ## Overview
 
@@ -342,8 +343,15 @@ Por que JetBrains Mono, e só para slugs, chaves e código: o slug é base62 ale
 o `l` tem cauda e o `I` tem serifas. É função, não fantasia "técnica".
 
 **Algarismos tabulares:** `font-variant-numeric: tabular-nums` em toda tabela, faixa de números, eixo e
-contador. A `docs/design/amostra.html` mede se a Archivo carregada troca mesmo a largura dos dígitos.
-Se não trocar, os números passam para a JetBrains Mono, como decisão registrada.
+contador. **Medido na fase 7:** com a Archivo Variable carregada, `tabular-nums` iguala a largura dos
+dígitos (a 40 px, "1111" e "0000" medem 90,9 px; sem tnum, 83,4 e 91,7 px). Os números ficam na
+Archivo; a JetBrains Mono continua só para slug, chave e código.
+
+**Carregamento:** auto-hospedadas pelo `@fontsource-variable/archivo/wdth.css` (eixos de largura 62–125
+e peso 100–900 num arquivo só, por faixa Unicode) e pelo `@fontsource-variable/jetbrains-mono`, com
+`font-display: swap`. Nenhum pedido ao Google Fonts. As famílias se chamam `Archivo Variable` e
+`JetBrains Mono Variable`. As páginas pequenas do redirect não baixam fonte: usam a Archivo se estiver
+instalada e a condensada do sistema no título.
 
 ### Escala da landing (Persuade, cinco tamanhos)
 
@@ -383,10 +391,11 @@ por tela (o título).
 - **App, casca "Open plane":** barra lateral de 232 px no próprio chão de papel, sem barra superior e
   sem fio entre barra e tela. Tela fluida com calha de 32 px, conteúdo até 1280 px, 12 colunas, folhas
   16 px uma da outra. A barra lateral tem a marca e o nome no topo, o seletor de conta, a navegação em
-  passo de 34 px (Links, Visão geral, Chaves de API) e o usuário no pé.
+  passo de 34 px (Links e Chaves de API; a "Visão geral" fica para uma fase seguinte) e, no pé, o tema
+  (sistema → claro → escuro) e o usuário com Sair.
 - **Pontos de quebra:** até 640 px (celular), de 641 a 1100 px (tablet, com a barra lateral dobrada) e
   acima disso o desktop.
-- **Celular:** a barra lateral vira uma barra de 48 px com o nome da tela, um menu em folha inteira e
+- **Celular:** a barra lateral vira uma barra de 56 px (alvos de 44 px) com o nome da tela, um menu em folha inteira e
   uma ação (Novo link). Tabelas viram listas de duas linhas abaixo de 640 px. Alvos de toque de 44 px.
 - **Densidade:** média. Linhas de 56 px na lista de links (slug e título em duas linhas) e de 44 px nas
   tabelas de dimensão; 20 px de padding de folha.
@@ -450,14 +459,14 @@ O resultado na landing e a linha da lista no celular.
 
 ### Linha da tabela (lista de links)
 
-| Coluna         | Conteúdo                                                                         |
-| -------------- | -------------------------------------------------------------------------------- |
-| Link           | slug em `slug` 14 px e o título em 12 px `suave` na segunda linha                |
-| Destino        | favicon de 16 px e domínio, cortado no meio quando longo (`loja.com.br/…/natal`) |
-| Regras         | até três chips; o resto em "+2" com a lista no tooltip                           |
-| Humanos (30 d) | à direita, tabular, em tinta; zero aparece como 0                                |
-| Criado         | data curta, `12 nov.`                                                            |
-| Ações          | Copiar sempre visível; menu (editar, QR, desativar, apagar)                      |
+| Coluna          | Conteúdo                                                                            |
+| --------------- | ----------------------------------------------------------------------------------- |
+| Link            | slug em `slug` 14 px e o título em 12 px `suave` na segunda linha                   |
+| Destino         | favicon de 16 px e domínio, cortado no meio quando longo (`loja.com.br/…/natal`)    |
+| Regras          | até três chips; o resto em "+2" com a lista no tooltip                              |
+| Humanos (total) | à direita, tabular, em tinta; zero aparece como 0 (a listagem traz o total do link) |
+| Criado          | data curta, `12 nov.`                                                               |
+| Ações           | Copiar sempre visível; menu (editar, QR, desativar, apagar)                         |
 
 Altura de 56 px, fio de 1 px entre linhas, sem zebra e sem faixa no cabeçalho. Cabeçalhos em 12 px
 `suave`, em caixa normal, numéricos à direita. Hover em `elevado`, a linha inteira leva à página do
@@ -501,6 +510,39 @@ humanos em `rosa-dado`, bots em hachura e prévias em pontilhado. Os rótulos fi
 e a porcentagem: "Humanos 12.480 (91 %) · Bots 802 · Prévias 431 (WhatsApp 390, Slack 41)". Ao lado,
 uma frase: "Só humanos entram no total e no limite de cliques."
 
+### Como foi construído (fase 7)
+
+| Peça                                                   | Onde                                                                     | Biblioteca                                                                             |
+| ------------------------------------------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Diálogos, confirmação, menus, dicas, seletor de países | `components/ui.tsx`, `Qr.tsx`, `EditLinkDialog.tsx`, `CountryPicker.tsx` | Base UI (`@base-ui/react`)                                                             |
+| Avisos curtos ("Regras salvas.", "Chave revogada")     | `routes/Root.tsx`                                                        | Sonner, com as cores de folha                                                          |
+| Série temporal                                         | `components/Charts.tsx`                                                  | Recharts, sem animação de entrada e sem camada de foco própria                         |
+| Mapa coroplético                                       | `components/Charts.tsx`                                                  | `world-atlas` 110 m, `topojson-client` e `d3-geo` (Equal Earth), carregado sob demanda |
+| QR (tela, PNG e SVG)                                   | `components/Qr.tsx`                                                      | `qrcode`, margem de 4 módulos, tinta sobre branco                                      |
+
+- **Botões:** primário em tinta (36 px, raio 4), secundário em `elevado`, fantasma transparente, perigo
+  em `negativo` com rótulo `on-tinta`. Pressionar dá `scale(0.97)` em 160 ms; hover só com ponteiro
+  fino. O Copiar troca o rótulo por "Copiado" sem mudar de largura (os dois rótulos ocupam a mesma
+  célula do grid).
+- **Campos:** 36 px (44 px e 16 px de fonte em tela de toque, sem zoom do iOS), borda `controle`, foco
+  com anel de 2 px em tinta. O erro fica embaixo, em `negativo`, ligado por `aria-describedby`.
+- **Filtros da lista:** busca com 300 ms de debounce, status em segmentos (Todos · Ativos · Desativados
+  · Expirados), senha, intervalo de criação e ordenação; tudo vai para a URL. Paginação por cursor com
+  "Carregar mais" e carga automática perto do fim.
+- **Página do link:** contador ao vivo à direita do título; chips de regra; seletor de período (24 h,
+  7 d, 30 d, 90 d, 12 m e personalizado) como grupo de rádio com setas; faixa de quatro números; régua
+  honesta; série em dois terços (humanos em rosa, únicos do dia tracejados em tinta, só na série
+  diária) com "Ver tabela"; países com mapa e lista; folhas de cidades, referrers, navegadores,
+  sistemas e aparelhos. A série escolhe a granularidade (até 2 dias por hora, até ~13 meses por dia,
+  depois por mês); totais e listas contam dias UTC inteiros, e a tela diz isso.
+- **Editar regras:** diálogo largo que começa pelas frases ("Como o link decide, em ordem") e só depois
+  mostra os campos; aviso em `aviso-fundo` ao escolher 301/308; o 412 vira "Alguém editou este link em
+  outra aba." com Recarregar.
+- **Chaves de API:** configuração em duas colunas; a chave nova aparece uma vez, em mono, com Copiar e
+  "Guarde agora: depois ela não aparece mais."; revogar pede confirmação com o nome.
+- **Sessão expirada:** diálogo de alerta que não fecha sozinho, com "Entrar de novo" voltando para a
+  mesma tela depois do login; se o logout veio de outra aba, ele diz isso.
+
 ## Data Patterns
 
 ### Números
@@ -535,7 +577,8 @@ uma frase: "Só humanos entram no total e no limite de cliques."
   `folha`. A legenda mostra os intervalos reais ("1–9", "10–99"…). Ao lado vai sempre a lista dos 10
   países com bandeira em texto (código ISO), número e porcentagem. O mapa é ilustração; a lista é o
   dado.
-- **Crédito:** "Geolocalização: DB-IP Lite (CC BY 4.0)" em 12 px sob o mapa e no rodapé.
+- **Crédito (licença CC BY 4.0):** "IP Geolocation by DB-IP", com link para https://db-ip.com, e
+  "(DB-IP Lite, CC BY 4.0)" em 12 px: sob o mapa, no rodapé de toda tela do app e no rodapé da landing.
 
 ### Estados
 
@@ -551,7 +594,22 @@ uma frase: "Só humanos entram no total e no limite de cliques."
 
 ## Motion
 
-A fase 7 implementa com `emil-design-eng` e `animate`. Aqui só os princípios:
+Implementado na fase 7 com `emil-design-eng` e `animate`. Os valores usados (tokens em `tokens.css`):
+`--ease-saida` `cubic-bezier(0.2, 0.8, 0.2, 1)`, `--dur-retorno` 160 ms e `--dur-assinatura` 420 ms.
+
+| Movimento                | Ferramenta                                         | Valores                                                                                       |
+| ------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Tira com a URL longa sai | transição CSS (troca de classe)                    | `translateY(8px)` e opacidade, 180 ms, `--ease-saida`                                         |
+| Tira nova é colada       | animação CSS (rara: uma vez por envio)             | de `rotate(-3deg) scale(1.02)` e opacidade 0 para `rotate(-1.5deg)`, 420 ms                   |
+| Link condensa            | animação CSS de `font-variation-settings`          | `wdth` 100 → 62, 420 ms                                                                       |
+| Papel endireita          | transição CSS                                      | `rotate(0)` no foco (sempre) e no hover (só ponteiro fino), 160 ms, `ease`                    |
+| Pressionar               | transição CSS                                      | `scale(0.97)`, 160 ms                                                                         |
+| Menus e dicas            | transição CSS com `data-starting-style` do Base UI | `scale(0.96)` e opacidade a partir do gatilho (`--transform-origin`), 160 ms; saída em 100 ms |
+| Diálogos                 | idem                                               | centrados, `scale(0.97)` e opacidade, 200 ms (no celular sobem 24 px, como folha)             |
+| Delta do ao vivo         | animação CSS que renasce a cada clique (`key`)     | fundo rosa a 22 % → transparente, 600 ms; o número troca sem animar                           |
+| Barras das dimensões     | transição CSS                                      | `scaleX`, 200 ms, quando o período muda                                                       |
+
+Princípios:
 
 1. **Um momento assinatura e mais nada que se apresente.** Na landing, o link curto nascendo: a tira
    com a URL longa é substituída por uma tira nova, colada por cima, e o texto do link passa da largura

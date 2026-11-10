@@ -19,3 +19,7 @@ packages/bench/results/
 apps/web/.impeccable/mocks/
 apps/web/.impeccable/questions/
 apps/web/.impeccable/review/
+
+# Playwright (e2e do web)
+test-results/
+playwright-report/

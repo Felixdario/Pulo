@@ -1,8 +1,9 @@
 /*
  * Tokens do Pulo (DESIGN.md, versão 0 da fase 6).
- * Ainda não é importado por nenhum componente: a fase 7 liga este arquivo em main.tsx.
+ * Importado em main.tsx (fase 7).
  * Contrastes conferidos estão na tabela de DESIGN.md > Colors.
- * Fontes: Archivo (variável, wdth 62–125, wght 100–900) e JetBrains Mono, auto-hospedadas na fase 7.
+ * Fontes: Archivo (variável, wdth 62–125, wght 100–900) e JetBrains Mono, auto-hospedadas via
+ * @fontsource-variable (nenhum pedido ao Google Fonts).
  */
 
 :root {
@@ -50,8 +51,9 @@
   --seq-vazio: var(--elevado);
 
   /* Tipo */
-  --fonte: 'Archivo', 'Arial Narrow', system-ui, sans-serif;
-  --fonte-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+  --fonte: 'Archivo Variable', 'Archivo', 'Arial Narrow', system-ui, sans-serif;
+  --fonte-mono:
+    'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
   --largura-cartaz: 62;
   --largura-numero: 75;
   --largura-texto: 100;

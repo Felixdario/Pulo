@@ -3,7 +3,7 @@ import { pageTitle } from './title';
 
 describe('pageTitle', () => {
   it('monta o título', () => {
-    expect(pageTitle()).toBe('Encurtador');
-    expect(pageTitle('Links')).toBe('Links · Encurtador');
+    expect(pageTitle()).toBe('Pulo: encurte links, conte só gente');
+    expect(pageTitle('Links')).toBe('Links · Pulo');
   });
 });

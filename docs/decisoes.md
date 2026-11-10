@@ -47,3 +47,33 @@ de cidades. Sem os arquivos, país e cidade continuam `null`.
 - **Sem entrevista com o usuário:** a fase rodou sem ela. O que foi inferido está marcado em
   `PRODUCT.md`. A mudança de nome ou de direção é barata até a fase 7.
 - **Rascunhos do impeccable:** ficam fora do git (`mocks/`, `questions/`, `review/`), como no Pontual.
+
+## D-07 — Bibliotecas do front (pick-ui-library, 2026-11-10)
+Pela lista curada da skill:
+- **@base-ui/react:** diálogos, menus, tooltips e o combobox de países, com foco e Esc acessíveis.
+- **sonner:** avisos curtos (toasts).
+- **recharts:** a série temporal.
+  - Sem animação de entrada, porque o DESIGN.md não desenha gráfico na entrada.
+  - O gráfico é `aria-hidden`, com resumo em texto e "Ver tabela".
+- **zustand:** o estado da sessão.
+- **clsx:** classes condicionais.
+
+Fora da lista:
+- **TanStack Router:** search params tipados para os filtros e o período; combina com o TanStack Query.
+- **world-atlas + topojson-client + d3-geo:** o mapa coroplético em Equal Earth, via npm.
+- **qrcode:** gera SVG e PNG localmente.
+- **i18n-iso-countries:** só a tabela de códigos numéricos para ISO-2. Os nomes dos países vêm do
+  `Intl.DisplayNames`.
+- **@fontsource-variable:** Archivo, com eixo de largura, e JetBrains Mono, auto-hospedadas.
+
+Recusadas: NumberFlow, motion, next-themes, Liveline e Virtuoso.
+- O contador troca de uma vez, como placar, sem rolar dígitos.
+- As animações são CSS, que é a ferramenta mais barata.
+- A SPA não tem SSR, então um script inline resolve o tema sem piscar.
+- A lista é paginada por cursor, sem virtualização.
+
+## D-08 — Slug em mono também na tira da landing (2026-11-10)
+A direção põe o link curto da tira em Archivo largura 62. Um slug aleatório como `sEXddOm` fica
+ambíguo entre O e 0, que é justamente o motivo de o DESIGN.md usar JetBrains Mono para slugs.
+Decisão: o slug vai em mono também na tira, e o domínio continua em Archivo. Fica para o polimento
+(fase 8).
