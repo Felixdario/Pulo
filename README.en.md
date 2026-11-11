@@ -49,7 +49,7 @@ big seed, opened in the dashboard. All 18 captures are in [`docs/screenshots/`](
 Prerequisites: Git, Docker and Node 22 (pnpm comes from corepack, no global install).
 
 ```bash
-git clone <repository-url> encurtador && cd encurtador
+git clone https://github.com/Felixdario/Pulo.git pulo && cd pulo
 docker compose up -d --wait
 corepack pnpm install && corepack pnpm demo
 ```

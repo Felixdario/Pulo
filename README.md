@@ -47,7 +47,7 @@ gerados pelo seed grande, aberto no painel. As 18 capturas estão em
 Pré-requisitos: Git, Docker e Node 22 (o pnpm vem do corepack, sem instalação global).
 
 ```bash
-git clone <url-do-repositório> encurtador && cd encurtador
+git clone https://github.com/Felixdario/Pulo.git pulo && cd pulo
 docker compose up -d --wait
 corepack pnpm install && corepack pnpm demo
 ```
