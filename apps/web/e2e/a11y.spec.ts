@@ -2,8 +2,26 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { entrarNoDemo, sufixo } from './apoio';
 
+/**
+ * Espera as animações finitas da página terminarem. Sem isso o axe mede o contraste de um elemento
+ * ainda entrando (a tira da landing leva 420 ms com opacidade), e o resultado depende da velocidade
+ * da máquina: no runner do GitHub ele acusava `color-contrast` em `.sublinhado`. Animações infinitas
+ * (o ponto pulsando do ao vivo) ficam de fora, porque nunca terminam.
+ */
+async function animacoesTerminadas(page: Page) {
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
+}
+
 /** axe com as regras WCAG 2.x A/AA: nenhuma violação, de qualquer impacto (fase 8). */
 async function semViolacoes(page: Page, tela: string) {
+  await animacoesTerminadas(page);
   const r = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
