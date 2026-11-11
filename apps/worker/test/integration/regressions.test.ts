@@ -283,14 +283,14 @@ describe('país e referrer hostis (validador C)', () => {
     await w.start();
     await t.drained(stream);
     const countries = await sql`
-      SELECT value, sum(n)::int AS n FROM clicks_daily_dim WHERE dim = 'country' GROUP BY 1 ORDER BY 1`;
+      SELECT value, sum(n)::int AS n FROM clicks_daily_dim WHERE dim = 'country' GROUP BY 1 ORDER BY value COLLATE "C"`;
     expect(countries.map((c) => [c.value, c.n])).toEqual([
       ['(desconhecido)', 2],
       ['BR', 4],
     ]);
     expect(COUNTRIES[0]).toBe('BR'); // as 3 sem país do evento caem no geo de 203.0.0.0 = BR
     const refs = await sql`
-      SELECT value, sum(n)::int AS n FROM clicks_daily_dim WHERE dim = 'referrer' GROUP BY 1 ORDER BY 1`;
+      SELECT value, sum(n)::int AS n FROM clicks_daily_dim WHERE dim = 'referrer' GROUP BY 1 ORDER BY value COLLATE "C"`;
     expect(refs.map((r) => [r.value, r.n])).toEqual([
       ['(desconhecido)', 1],
       ['(direto)', 3],

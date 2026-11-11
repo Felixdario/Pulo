@@ -35,7 +35,7 @@ async function totals() {
            coalesce(sum(bots), 0) AS bots, coalesce(sum(previews), 0) AS previews,
            coalesce(sum(uniques), 0) AS uniques FROM clicks_daily`;
   const dims = await sql<{ dim: string; n: string }[]>`
-    SELECT dim, sum(n) AS n FROM clicks_daily_dim GROUP BY dim ORDER BY dim`;
+    SELECT dim, sum(n) AS n FROM clicks_daily_dim GROUP BY dim ORDER BY dim COLLATE "C"`;
   const [prev] = await sql`SELECT coalesce(sum(n), 0) AS n FROM clicks_daily_preview`;
   const [visitors] = await sql`SELECT count(*) AS n FROM click_visitors`;
   const [counts] = await sql`SELECT coalesce(sum(click_count), 0) AS n FROM links`;
@@ -228,7 +228,7 @@ describe('4 workers concorrentes', () => {
 
     // Países: os 10, e só de humanos.
     const countries = await sql<{ value: string; n: string }[]>`
-      SELECT value, sum(n) AS n FROM clicks_daily_dim WHERE dim = 'country' GROUP BY value ORDER BY value`;
+      SELECT value, sum(n) AS n FROM clicks_daily_dim WHERE dim = 'country' GROUP BY value ORDER BY value COLLATE "C"`;
     expect(countries.map((c) => c.value).sort()).toEqual([...COUNTRIES].sort());
     const [maxDev] =
       await sql`SELECT count(DISTINCT value) AS n FROM clicks_daily_dim WHERE dim = 'device'`;
@@ -333,7 +333,7 @@ describe('classificação', () => {
     await w.start();
     await t.drained(stream);
     const kinds =
-      await sql`SELECT kind, preview_app, count(*)::int AS n FROM clicks GROUP BY 1, 2 ORDER BY 1, 2`;
+      await sql`SELECT kind, preview_app, count(*)::int AS n FROM clicks GROUP BY 1, 2 ORDER BY kind COLLATE "C", preview_app COLLATE "C"`;
     expect(kinds.map((k) => [k.kind, k.preview_app, k.n])).toEqual([
       ['bot', null, 3],
       ['human', null, 2],
@@ -344,7 +344,7 @@ describe('classificação', () => {
     const s = await totals();
     expectConsistent(s);
     expect(s.daily).toMatchObject({ total: 8, humans: 2, uniques: 2, bots: 3, previews: 3 });
-    const prev = await sql`SELECT app, n::int FROM clicks_daily_preview ORDER BY app`;
+    const prev = await sql`SELECT app, n::int FROM clicks_daily_preview ORDER BY app COLLATE "C"`;
     expect(prev.map((p) => [p.app, p.n])).toEqual([
       ['facebook', 1],
       ['slack', 1],
@@ -369,7 +369,7 @@ describe('classificação', () => {
     await w.start();
     await t.drained(stream);
     const refs =
-      await sql`SELECT value FROM clicks_daily_dim WHERE dim = 'referrer' ORDER BY value`;
+      await sql`SELECT value FROM clicks_daily_dim WHERE dim = 'referrer' ORDER BY value COLLATE "C"`;
     expect(refs.map((r) => r.value)).toEqual([
       '(direto)',
       'app:com.exemplo.app',
