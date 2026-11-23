@@ -1,6 +1,9 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from './schema';
+import { normalizeDatabaseUrl } from './url';
+
+export { normalizeDatabaseUrl } from './url';
 
 export type Database = ReturnType<typeof createDb>['db'];
 
@@ -24,7 +27,7 @@ export function createDb(
     throw new Error('DATABASE_URL não definida');
   }
   const { onQuery } = options;
-  const sql = postgres(url, {
+  const sql = postgres(normalizeDatabaseUrl(url), {
     max: options.max ?? 10,
     onnotice: () => {},
     ...(onQuery ? { debug: (_conn: number, query: string) => onQuery(query) } : {}),
