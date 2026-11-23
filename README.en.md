@@ -2,6 +2,8 @@
 
 [Versão em português](README.md)
 
+**Live:** [pulo-two.vercel.app](https://pulo-two.vercel.app) (free plans: the first visit can take up to a minute).
+
 ![A Pulo link page with 4.4 million human clicks: live counter, the humans/bots/previews bar, a 12-month series and a country map](docs/screenshots/link-5m-1440-claro.png)
 
 Pulo is a URL shortener with analytics. It swaps a long link for a short one, decides where each click
@@ -473,5 +475,4 @@ docs/             ADRs, performance, polish, decisions, design and screenshots
   [axe-core](https://github.com/dequelabs/axe-core) and
   [autocannon](https://github.com/mcollina/autocannon).
 
-A portfolio project, the third of four. **License: to be decided.** The repository has no license file
-yet.
+A portfolio project, the third of four. Licensed under [MIT](LICENSE).

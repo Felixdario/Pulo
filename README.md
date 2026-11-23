@@ -2,6 +2,8 @@
 
 [English version](README.en.md)
 
+**No ar:** [pulo-two.vercel.app](https://pulo-two.vercel.app) (planos grátis: a primeira visita pode levar até um minuto).
+
 ![Página de um link do Pulo com 4,4 milhões de cliques humanos: contador ao vivo, régua de humanos, bots e prévias, série de 12 meses e mapa de países](docs/screenshots/link-5m-1440-claro.png)
 
 O Pulo é um encurtador de URLs com analytics. Ele troca um link longo por um curto, decide para onde
@@ -462,5 +464,4 @@ docs/             ADRs, performance, polimento, decisões, design e screenshots
   [axe-core](https://github.com/dequelabs/axe-core) e
   [autocannon](https://github.com/mcollina/autocannon).
 
-Projeto de portfólio, o terceiro de quatro. **Licença: a definir.** O repositório ainda não tem
-arquivo de licença.
+Projeto de portfólio, o terceiro de quatro. Licença [MIT](LICENSE).
