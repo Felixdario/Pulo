@@ -257,23 +257,6 @@ export function buildApp(deps: RedirectDeps) {
     reply.type(metrics.registry.contentType).send(await metrics.registry.metrics()),
   );
   app.get('/', async (req, reply) => sendProblem(req, reply, 'not_found'));
-  // TEMPORÁRIO: diagnóstico do proxy da hospedagem (qual IP conecta e quais cabeçalhos chegam),
-  // para acertar o TRUST_PROXY. Só existe com DEBUG_PROXY=1 e só devolve a quem chama os dados da
-  // própria requisição. Sai assim que o TRUST_PROXY estiver certo.
-  if (process.env.DEBUG_PROXY === '1') {
-    app.get('/__proxy', async (req) => {
-      const h = req.headers;
-      return {
-        peer: req.socket.remoteAddress ?? null,
-        ip: req.ip,
-        xForwardedFor: h['x-forwarded-for'] ?? null,
-        cfConnectingIp: h['cf-connecting-ip'] ?? null,
-        trueClientIp: h['true-client-ip'] ?? null,
-        xRealIp: h['x-real-ip'] ?? null,
-        cfIpCountry: h['cf-ipcountry'] ?? null,
-      };
-    });
-  }
 
   const redirectHandler = async (
     req: FastifyRequest<{ Params: { slug: string } }>,
