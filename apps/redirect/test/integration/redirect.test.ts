@@ -361,6 +361,37 @@ describe('status e Cache-Control (ADR 0002, seção 1)', () => {
     expect((await get(a, '/padrao')).statusCode).toBe(302);
     expect((await get(a, '/perm')).headers['cache-control']).toBe('public, max-age=3600');
   });
+
+  const postJson = (a: ReturnType<typeof t.app>, url: string, remoteAddress = '198.51.100.30') =>
+    a.inject({
+      method: 'POST',
+      url,
+      headers: { 'content-type': 'application/json', 'user-agent': UA.chrome },
+      payload: '{"evento":"pedido"}',
+      remoteAddress,
+    });
+
+  it.each([307, 308] as const)(
+    'POST num link %d sem senha segue para o destino com o mesmo código (preserva o método)',
+    async (redirectType) => {
+      await createLink(db, { destination: dest, alias: `post-${redirectType}`, redirectType });
+      const a = t.app();
+      const res = await postJson(a, `/post-${redirectType}`);
+      expect(res.statusCode).toBe(redirectType);
+      expect(res.headers.location).toBe(dest);
+      // Não usa o bucket do formulário de senha (5/min): um webhook manda mais que isso.
+      for (let i = 0; i < 6; i++) {
+        expect((await postJson(a, `/post-${redirectType}`)).statusCode).toBe(redirectType);
+      }
+    },
+  );
+
+  it('POST num link 302 sem senha continua voltando ao GET com 303', async () => {
+    await createLink(db, { destination: dest, alias: 'post-302', redirectType: 302 });
+    const res = await postJson(t.app(), '/post-302');
+    expect(res.statusCode).toBe(303);
+    expect(res.headers.location).toBe('/post-302');
+  });
 });
 
 describe('cache', () => {

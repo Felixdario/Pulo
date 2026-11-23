@@ -258,7 +258,10 @@ export function buildApp(deps: RedirectDeps) {
   );
   app.get('/', async (req, reply) => sendProblem(req, reply, 'not_found'));
 
-  app.get<{ Params: { slug: string } }>('/:slug', async (req, reply) => {
+  const redirectHandler = async (
+    req: FastifyRequest<{ Params: { slug: string } }>,
+    reply: FastifyReply,
+  ) => {
     const ctx: NonNullable<FastifyRequest['redirect']> = { cache: 'none', click: null };
     req.redirect = ctx;
     const { slug } = req.params;
@@ -342,7 +345,9 @@ export function buildApp(deps: RedirectDeps) {
       .header('cache-control', cacheControl(link))
       .header('referrer-policy', 'unsafe-url')
       .send();
-  });
+  };
+
+  app.get<{ Params: { slug: string } }>('/:slug', redirectHandler);
 
   app.post<{ Params: { slug: string }; Body: { password?: unknown } | undefined }>(
     '/:slug',
@@ -352,6 +357,21 @@ export function buildApp(deps: RedirectDeps) {
       const { slug } = req.params;
       if (!SLUG_FORMAT.test(slug) || isReservedSlug(slug))
         return sendProblem(req, reply, 'not_found');
+
+      // 307 e 308 existem para preservar o método: um POST num link sem senha (um webhook, por
+      // exemplo) segue para o destino pelo mesmo caminho do GET, com o bucket normal, as regras e o
+      // clique. Só o formulário de senha usa o bucket apertado abaixo e o 303 de volta ao GET.
+      const early = await lookupLink(req, reply, slug, false);
+      if (!early) return reply;
+      const l = early.link;
+      if (
+        l &&
+        l.status === 'active' &&
+        l.passwordVersion === null &&
+        (l.redirectType === 307 || l.redirectType === 308)
+      ) {
+        return redirectHandler(req, reply);
+      }
 
       // Bucket próprio e apertado (5/min por visitante e link), mesmo com RATE_LIMIT=off.
       try {
