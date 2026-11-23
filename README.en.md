@@ -387,9 +387,9 @@ phase):
 | Suite                                                                                                                      | Tests          | How to run                                                     |
 | -------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------------------- |
 | `packages/shared` unit tests: slug (with 1 M slugs), destination, IP, reserved words, helpers; fast-check in 5 files       | 461 in 8 files | `corepack pnpm --filter @encurtador/shared test`               |
-| Unit tests in the other packages (web 33, worker 21, bench 7, api 5, db 4, geo 3, redirect 2)                              | 75             | `corepack pnpm test` (runs all of them: 536)                   |
+| Unit tests in the other packages (web 33, worker 21, bench 7, api 5, db 6, geo 3, redirect 2)                              | 77             | `corepack pnpm test` (runs all of them: 538)                   |
 | `packages/db` integration (forced collision, alias race, batch deadlock, cache, query plans)                               | 42             | `corepack pnpm --filter @encurtador/db test:integration`       |
-| `apps/redirect` integration (one rule per test, invalidation, destination bypasses, bucket)                                | 34             | `corepack pnpm --filter @encurtador/redirect test:integration` |
+| `apps/redirect` integration (one rule per test, invalidation, destination bypasses, bucket)                                | 37             | `corepack pnpm --filter @encurtador/redirect test:integration` |
 | `apps/worker` integration (redelivery, crash, 4 workers × 100,000, the Validator's regressions)                            | 25             | `corepack pnpm --filter @encurtador/worker test:integration`   |
 | `apps/api` integration (every route, isolation between users via JWT and via key, OpenAPI)                                 | 68             | `corepack pnpm --filter @encurtador/api test:integration`      |
 | Aggregates vs raw consistency (5 M, or 50 thousand in CI)                                                                  | 8              | `corepack pnpm seed:big` then `corepack pnpm test:consistency` |
